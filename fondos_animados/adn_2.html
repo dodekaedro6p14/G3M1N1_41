@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADN en el Citoplasma - 3D Dinámico</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #050a1a; /* Color base oscuro */
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: rgba(0, 255, 255, 0.6);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            pointer-events: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ui">Visualización Celular: ADN v2.0</div>
+    <canvas id="dnaCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('dnaCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let particles = [];
+        let dnaNodes = [];
+        
+        // Configuración
+        const nodeCount = 60; // Longitud de la cadena
+        const radius = 80;    // Radio de la hélice
+        const speed = 0.02;   // Velocidad de rotación
+        const particleCount = 150; // Basura celular/citoplasma
+
+        function init() {
+            resize();
+            createParticles();
+            animate();
+        }
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resize);
+
+        // Partículas del citoplasma (fondo dinámico)
+        function createParticles() {
+            particles = [];
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    size: Math.random() * 2 + 0.5,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    opacity: Math.random() * 0.5
+                });
+            }
+        }
+
+        function drawDNA(tick) {
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const spacing = height / (nodeCount * 0.8);
+
+            for (let i = 0; i < nodeCount; i++) {
+                // Ecuación de la doble hélice con desfase de PI
+                const angle = tick + (i * 0.2);
+                const y = (i * spacing) - (nodeCount * spacing) / 2 + centerY;
+
+                // Hebra A
+                drawNode(angle, y, i, "#00d2ff", "#3a7bd5");
+                // Hebra B (desfasada 180 grados)
+                drawNode(angle + Math.PI, y, i, "#92fe9d", "#00c9ff");
+                
+                // Línea de unión (puentes de hidrógeno)
+                if (i % 2 === 0) {
+                    drawConnector(angle, y, i);
+                }
+            }
+        }
+
+        function drawNode(angle, y, index, color1, color2) {
+            // Proyección 3D básica
+            const x = (width / 2) + Math.cos(angle) * radius;
+            const z = Math.sin(angle) * radius; // Profundidad
+            
+            // Escala según profundidad (z) para efecto 3D
+            const scale = (z + radius) / (2 * radius) * 0.5 + 0.5;
+            const nodeSize = 4 * scale;
+            
+            // Desenfoque según profundidad (simula líquido)
+            const blur = Math.abs(z - radius) / 20;
+            
+            ctx.beginPath();
+            ctx.arc(x, y, nodeSize, 0, Math.PI * 2);
+            ctx.fillStyle = color1;
+            ctx.shadowBlur = blur + 5;
+            ctx.shadowColor = color1;
+            ctx.globalAlpha = scale;
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function drawConnector(angle, y, index) {
+            const x1 = (width / 2) + Math.cos(angle) * radius;
+            const x2 = (width / 2) + Math.cos(angle + Math.PI) * radius;
+            const z = Math.sin(angle) * radius;
+            
+            const scale = (z + radius) / (2 * radius) * 0.5 + 0.5;
+
+            ctx.beginPath();
+            ctx.moveTo(x1, y);
+            ctx.lineTo(x2, y);
+            ctx.lineWidth = 1 * scale;
+            ctx.strokeStyle = "rgba(255, 255, 255, " + (scale * 0.3) + ")";
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        function drawCytoplasm() {
+            // Fondo con gradiente radial para dar profundidad al "líquido"
+            const grad = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, width);
+            grad.addColorStop(0, '#0a1931');
+            grad.addColorStop(1, '#00050a');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, width, height);
+
+            // Dibujar partículas flotantes
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.x < 0) p.x = width;
+                if (p.x > width) p.x = 0;
+                if (p.y < 0) p.y = height;
+                if (p.y > height) p.y = 0;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(100, 200, 255, ${p.opacity})`;
+                ctx.fill();
+            });
+        }
+
+        let tick = 0;
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            drawCytoplasm();
+            drawDNA(tick);
+            
+            tick += speed;
+            requestAnimationFrame(animate);
+        }
+
+        init();
+    </script>
+</body>
+</html>

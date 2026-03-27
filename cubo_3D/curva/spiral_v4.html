@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Spiral - Centered Network V4.0 (fruta)</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <div class="filamentos-bg"></div>
+
+    <div class="stage">
+        <div class="carrusel" id="helix-table">
+        </div>
+    </div>
+
+    <div class="hub">
+        <div class="hub-title">CUANTICO_DOCS V4.0</div>
+        <div class="controles">
+            <span>CLIC: FOCALIZAR FRONTAL</span>
+            <span>ESC: SALIR FOCUS / CENTRAR</span>
+            |
+            <span>A / D</span> Girar
+            <span>W / S</span> Subir / Bajar
+            <span>Q / E</span> Zoom
+            <span>R</span> Reset
+        </div>
+        <div id="status" style="font-size: 10px; color: #666;">ESTADO: ESTABLE (NAVEGACIÓN FRONTAL ACTIVA)</div>
+    </div>
+
+    <script>
+        const helixContainer = document.getElementById('helix-table');
+        const statusDisplay = document.getElementById('status');
+
+        // --- 1. DATOS DE LOS NODOS (FÁCIL DE AGREGAR MÁS AQUÍ) ---
+        // Capitana, de aquí te encargas tú. Copia y pega bloques para agregar más.
+        const nodosData = [
+            {
+                id: "01",
+                header: "NODO CUÁNTICO DE ORIGEN",
+                content: `
+                    <p><strong>Interacción Cuántica detectada.</strong></p>
+                    <p>Analizando filamentos luminosos en la capa de datos... El vacío no es oscuridad, es energía en reposo esperando ser observada.</p>
+                    <hr style="border: 0.5px solid rgba(0,242,255,0.2)">
+                    <p>Este es el primer nodo de tu espiral cuántica estática. No es editable en la web, se edita manualmente en el código HTML.</p>
+                    <p>He aumentado la separación vertical a 650px para solucionar el solapamiento visual. La espiral ahora es majestuosa.</p>
+                    <p>Cada nodo se ajusta automáticamente al centro frontal al navegar.</p>
+                `
+            },
+            {
+                id: "02",
+                header: "NODO INF-02 [EJEMPLO]",
+                content: `
+                    <p><strong>Filamentos Luminosos Estables.</strong></p>
+                    <p>Este nodo sirve como ejemplo de la geometría cuántica de la hélice.</p>
+                    <p>He quitado la opción de edición en web (contenteditable) para preservar la información que edites manualmente en el HTML.</p>
+                    <p>Para agregar más nodos, simplemente copia y pega este bloque de datos dentro del array en el script.</p>
+                    <p>Disfruta de la visión envolvente y centrada.</p>
+                `
+            },
+            {
+                id: "03",
+                header: "NODO INF-03 [EJEMPLO]",
+                content: `
+                    <p><strong>demostracion vegar.</strong></p>
+                    <p>Este nodo sirve como ejemplo de la geometría cuántica de la hélice.</p>
+                    <p>He quitado la opción de edición en web (contenteditable) para preservar la información que edites manualmente en el HTML.</p>
+                    <p>Para agregar más nodos, simplemente copia y pega este bloque de datos dentro del array en el script.</p>
+                    <p>Disfruta de la visión envolvente y centrada.</p>
+                `
+            },
+            {
+                id: "04",
+                header: "NODO INF-03 [EJEMPLO]",
+                content: `
+                    <p><strong>demostracion vegar.</strong></p>
+                    <p>Este nodo sirve como ejemplo de la geometría cuántica de la hélice.</p>
+                    <p>He quitado la opción de edición en web (contenteditable) para preservar la información que edites manualmente en el HTML.</p>
+                    <p>Para agregar más nodos, simplemente copia y pega este bloque de datos dentro del array en el script.</p>
+                    <p>Disfruta de la visión envolvente y centrada.</p>
+                `
+            },
+            {
+                id: "05",
+                header: "NODO INF-03 [EJEMPLO]",
+                content: `
+                    <p><strong>demostracion vegar.</strong></p>
+                    <p>Este nodo sirve como ejemplo de la geometría cuántica de la hélice.</p>
+                    <p>He quitado la opción de edición en web (contenteditable) para preservar la información que edites manualmente en el HTML.</p>
+                    <p>Para agregar más nodos, simplemente copia y pega este bloque de datos dentro del array en el script.</p>
+                    <p>Disfruta de la visión envolvente y centrada.</p>
+                `
+            },
+            {
+                id: "06",
+                header: "NODO INF-03 [EJEMPLO]",
+                content: `
+                    <p><strong>demostracion vegar.</strong></p>
+                    <p>Este nodo sirve como ejemplo de la geometría cuántica de la hélice.</p>
+                    <p>He quitado la opción de edición en web (contenteditable) para preservar la información que edites manualmente en el HTML.</p>
+                    <p>Para agregar más nodos, simplemente copia y pega este bloque de datos dentro del array en el script.</p>
+                    <p>Disfruta de la visión envolvente y centrada.</p>
+                `
+            },
+            {
+                id: "07",
+                header: "NODO INF-03 [EJEMPLO]",
+                content: `
+                    <p><strong>demostracion vegar.</strong></p>
+                    <p>Este nodo sirve como ejemplo de la geometría cuántica de la hélice.</p>
+                    <p>He quitado la opción de edición en web (contenteditable) para preservar la información que edites manualmente en el HTML.</p>
+                    <p>Para agregar más nodos, simplemente copia y pega este bloque de datos dentro del array en el script.</p>
+                    <p>Disfruta de la visión envolvente y centrada.</p>
+                `
+            },
+            {
+                id: "08",
+                header: "NODO INF-03 [EJEMPLO]",
+                content: `
+                    <p><strong>demostracion vegar.</strong></p>
+                    <p>Este nodo sirve como ejemplo de la geometría cuántica de la hélice.</p>
+                    <p>He quitado la opción de edición en web (contenteditable) para preservar la información que edites manualmente en el HTML.</p>
+                    <p>Para agregar más nodos, simplemente copia y pega este bloque de datos dentro del array en el script.</p>
+                    <p>Disfruta de la visión envolvente y centrada.</p>
+                `
+            },
+            {
+                id: "09",
+                header: "NODO INF-03 [EJEMPLO]",
+                content: `
+                    <p><strong>demostracion vegar.</strong></p>
+                    <p>Este nodo sirve como ejemplo de la geometría cuántica de la hélice.</p>
+                    <p>He quitado la opción de edición en web (contenteditable) para preservar la información que edites manualmente en el HTML.</p>
+                    <p>Para agregar más nodos, simplemente copia y pega este bloque de datos dentro del array en el script.</p>
+                    <p>Disfruta de la visión envolvente y centrada.</p>
+                `
+            },
+            {
+                id: "10",
+                header: "NODO INF-03 [EJEMPLO]",
+                content: `
+                    <p><strong>demostracion vegar.</strong></p>
+                    <p>Este nodo sirve como ejemplo de la geometría cuántica de la hélice.</p>
+                    <p>He quitado la opción de edición en web (contenteditable) para preservar la información que edites manualmente en el HTML.</p>
+                    <p>Para agregar más nodos, simplemente copia y pega este bloque de datos dentro del array en el script.</p>
+                    <p>Disfruta de la visión envolvente y centrada.</p>
+                `
+            },
+            {
+                id: "11",
+                header: "NODO INF-03 [EJEMPLO]",
+                content: `
+                    <p><strong>demostracion vegar.</strong></p>
+                    <p>Este nodo sirve como ejemplo de la geometría cuántica de la hélice.</p>
+                    <p>He quitado la opción de edición en web (contenteditable) para preservar la información que edites manualmente en el HTML.</p>
+                    <p>Para agregar más nodos, simplemente copia y pega este bloque de datos dentro del array en el script.</p>
+                    <p>Disfruta de la visión envolvente y centrada.</p>
+                `
+            },
+            {
+                id: "12",
+                header: "NODO INF-03 [EJEMPLO]",
+                content: `
+                    <p><strong>demostracion vegar.</strong></p>
+                    <p>Este nodo sirve como ejemplo de la geometría cuántica de la hélice.</p>
+                    <p>He quitado la opción de edición en web (contenteditable) para preservar la información que edites manualmente en el HTML.</p>
+                    <p>Para agregar más nodos, simplemente copia y pega este bloque de datos dentro del array en el script.</p>
+                    <p>Disfruta de la visión envolvente y centrada.</p>
+                `
+            },
+            {
+                id: "13",
+                header: "NODO INF-03 [EJEMPLO]",
+                content: `
+                    <p><strong>demostracion vegar.</strong></p>
+                    <p>Este nodo sirve como ejemplo de la geometría cuántica de la hélice.</p>
+                    <p>He quitado la opción de edición en web (contenteditable) para preservar la información que edites manualmente en el HTML.</p>
+                    <p>Para agregar más nodos, simplemente copia y pega este bloque de datos dentro del array en el script.</p>
+                    <p>Disfruta de la visión envolvente y centrada.</p>
+                `
+            },
+            {
+                id: "14",
+                header: "NODO INF-03 [EJEMPLO]",
+                content: `
+                    <p><strong>demostracion vegar.</strong></p>
+                    <p>Este nodo sirve como ejemplo de la geometría cuántica de la hélice.</p>
+                    <p>He quitado la opción de edición en web (contenteditable) para preservar la información que edites manualmente en el HTML.</p>
+                    <p>Para agregar más nodos, simplemente copia y pega este bloque de datos dentro del array en el script.</p>
+                    <p>Disfruta de la visión envolvente y centrada.</p>
+                `
+            },
+            {
+                id: "15",
+                header: "NODO INF-03 [EJEMPLO]",
+                content: `
+                    <p><strong>demostracion vegar.</strong></p>
+                    <p>Este nodo sirve como ejemplo de la geometría cuántica de la hélice.</p>
+                    <p>He quitado la opción de edición en web (contenteditable) para preservar la información que edites manualmente en el HTML.</p>
+                    <p>Para agregar más nodos, simplemente copia y pega este bloque de datos dentro del array en el script.</p>
+                    <p>Disfruta de la visión envolvente y centrada.</p>
+                `
+            },
+            {
+                id: "16",
+                header: "NODO INF-03 [EJEMPLO]",
+                content: `
+                    <p><strong>demostracion vegar.</strong></p>
+                    <p>Este nodo sirve como ejemplo de la geometría cuántica de la hélice.</p>
+                    <p>He quitado la opción de edición en web (contenteditable) para preservar la información que edites manualmente en el HTML.</p>
+                    <p>Para agregar más nodos, simplemente copia y pega este bloque de datos dentro del array en el script.</p>
+                    <p>Disfruta de la visión envolvente y centrada.</p>
+                `
+            },
+            {
+                id: "17",
+                header: "NODO INF-03 [EJEMPLO]",
+                content: `
+                    <p><strong>demostracion vegar.</strong></p>
+                    <p>Este nodo sirve como ejemplo de la geometría cuántica de la hélice.</p>
+                    <p>He quitado la opción de edición en web (contenteditable) para preservar la información que edites manualmente en el HTML.</p>
+                    <p>Para agregar más nodos, simplemente copia y pega este bloque de datos dentro del array en el script.</p>
+                    <p>Disfruta de la visión envolvente y centrada.</p>
+                `
+            },
+            {
+                id: "18",
+                header: "NODO INF-03 [EJEMPLO]",
+                content: `
+                    <p><strong>demostracion vegar.</strong></p>
+                    <p>Este nodo sirve como ejemplo de la geometría cuántica de la hélice.</p>
+                    <p>He quitado la opción de edición en web (contenteditable) para preservar la información que edites manualmente en el HTML.</p>
+                    <p>Para agregar más nodos, simplemente copia y pega este bloque de datos dentro del array en el script.</p>
+                    <p>Disfruta de la visión envolvente y centrada.</p>
+                `
+            },
+            {
+                id: "19",
+                header: "NODO INF-03 [EJEMPLO]",
+                content: `
+                    <p><strong>demostracion vegar.</strong></p>
+                    <p>Este nodo sirve como ejemplo de la geometría cuántica de la hélice.</p>
+                    <p>He quitado la opción de edición en web (contenteditable) para preservar la información que edites manualmente en el HTML.</p>
+                    <p>Para agregar más nodos, simplemente copia y pega este bloque de datos dentro del array en el script.</p>
+                    <p>Disfruta de la visión envolvente y centrada.</p>
+                `
+            },
+            {
+                id: "20",
+                header: "NODO INF-03 [EJEMPLO]",
+                content: `
+                    <p><strong>demostracion vegar.</strong></p>
+                    <p>Este nodo sirve como ejemplo de la geometría cuántica de la hélice.</p>
+                    <p>He quitado la opción de edición en web (contenteditable) para preservar la información que edites manualmente en el HTML.</p>
+                    <p>Para agregar más nodos, simplemente copia y pega este bloque de datos dentro del array en el script.</p>
+                    <p>Disfruta de la visión envolvente y centrada.</p>
+                `
+            }
+            // Agrega más aquí siguiendo la estructura...
+        ];
+
+        // --- 2. MOTOR GEOMÉTRICO CUÁNTICO (V4) ---
+
+        // Recuperamos las variables CSS de geometría centralizadas
+        const styleProps = getComputedStyle(document.documentElement);
+        const yDescendPerElement = parseFloat(styleProps.getPropertyValue('--descenso-por-elemento'));
+        const degPerElement = parseFloat(styleProps.getPropertyValue('--grados-por-elemento'));
+        const radius = parseFloat(styleProps.getPropertyValue('--radius'));
+        const focusZOffset = parseFloat(styleProps.getPropertyValue('--focus-offset'));
+
+        // Variables de estado
+        let currentRot = 0;
+        let currentZoom = -radius; // Distancia focal inicial constante
+        let currentYNav = 0; // Navegación vertical manual (W/S)
+
+        // --- LÓGICA DE SUPERPOSICIÓN (FOCUS) ---
+        let nodeFocused = false;
+        let focusedNodeRef = null;
+
+        // --- MOTOR DE DIRECCIÓN Y AUTO-CENTRADO FRONTAL ---
+        function updateFrame() {
+            // 1. Calculamos la rotación normalizada (0 a 360)
+            let normalizedRot = currentRot % 360;
+            if (normalizedRot < 0) normalizedRot += 360;
+
+            // --- ALGORITMO DE AUTO-CENTRADO FRONTAL (V4) ---
+            // Buscamos qué nodo teóricamente está a angleY=0
+            // Usamos la rotación global (currentRot) dividida por degPerElement
+            const indexNodeAt0deg = Math.round(normalizedRot / degPerElement);
+
+            // Calculamos el translateY teórico que corresponde a ese nodo en la espiral
+            const ySpiralNodeAt0 = indexNodeAt0deg * yDescendPerElement;
+
+            // Calculamos el translateY de compensación para centrarlo en Y=0
+            const offsetYCentering = ySpiralNodeAt0;
+
+            // 2. Aplicamos las transformaciones al contenedor global (carrusel)
+            // Combinamos el centrado automático (offsetYCentering) con la navegación manual (currentYNav)
+            helixContainer.style.transform = `
+                translateY(${-offsetYCentering + currentYNav}px) 
+                translateZ(${currentZoom}px) 
+                rotateY(${-currentRot}deg)
+            `;
+
+            // Si hay un nodo enfocado, debemos forzar su superposición frontal
+            if (nodeFocused && focusedNodeRef) {
+                applyFocusTransform(focusedNodeRef, offsetYCentering);
+            }
+        }
+
+        // Aplica la transformación dramática de focus (Superposición Frontal)
+        function applyFocusTransform(nodeRef, carruselYCentering) {
+            const idx = parseInt(nodeRef.dataset.index);
+            const yPosInSpiral = idx * yDescendPerElement;
+            const reverseRotation = currentRot;
+
+            // CORRECCIÓN: 
+            // Si 'radius' es 800, 'radius + 500' lo acerca mucho pero lo mantiene visible.
+            // Si sigue viéndose oscuro, prueba con 'radius + 600'.
+            const safeFocusZ = radius + 500;
+
+            nodeRef.style.transform = `
+                rotateY(${reverseRotation}deg) 
+                translateY(${-yPosInSpiral}px) 
+                translateZ(${safeFocusZ}px) 
+                scale(1.1)
+            `;
+        }
+
+        function resetFocus() {
+            if (focusedNodeRef) {
+                const idx = parseInt(focusedNodeRef.dataset.index);
+                const theta = idx * degPerElement;
+                const yPos = idx * yDescendPerElement;
+
+                // Restauramos la transformación helical normal
+                focusedNodeRef.style.transform = `rotateY(${theta}deg) translateY(${yPos}px) translateZ(${radius}px)`;
+                focusedNodeRef.classList.remove('focused-node');
+            }
+            nodeFocused = false;
+            focusedNodeRef = null;
+            document.body.classList.remove('overlay-active');
+            statusDisplay.innerText = "ESTADO: ESTABLE (NAVEGACIÓN FRONTAL ACTIVA)";
+            statusDisplay.style.color = "#666";
+            updateFrame(); // Actualizamos para reajustar carrusel
+        }
+
+        // --- CONSTRUCTOR DE LA HÉLICE CUÁNTICA V4 ---
+        function buildHelicalTable() {
+            helixContainer.innerHTML = ''; // Limpiar por seguridad
+
+            nodosData.forEach((el, index) => {
+                const elDiv = document.createElement('div');
+                elDiv.className = 'elemento';
+                elDiv.dataset.index = index; // Guardamos el índice
+
+                // INYECCIÓN DEL TEXTO DE ORIGEN ESTÁTICO (NO contenteditable)
+                elDiv.innerHTML = `
+                    <div class="doc-header">${el.header} [INF-${el.id}]</div>
+                    <div class="doc-content">
+                        ${el.content}
+                    </div>
+                `;
+
+                // --- POSICIONAMIENTO HELICAL INICIAL (HÉLICE PERFECTA) ---
+                const theta = index * degPerElement;
+                const yPos = index * yDescendPerElement;
+                elDiv.style.transform = `rotateY(${theta}deg) translateY(${yPos}px) translateZ(${radius}px)`;
+
+                // --- GESTIÓN DE EVENTOS PARA FOCUS/SUPERPOSICIÓN ---
+                elDiv.addEventListener('click', (e) => {
+                    // Evitamos que el clic se propague si hacemos clic dentro del contenido
+                    if (nodeFocused && focusedNodeRef === elDiv) return;
+
+                    if (nodeFocused) resetFocus(); // Si había otro enfocado, lo reseteamos
+
+                    nodeFocused = true;
+                    focusedNodeRef = elDiv;
+                    elDiv.classList.add('focused-node');
+                    document.body.classList.add('overlay-active');
+                    statusDisplay.innerText = "ESTADO: DOCUMENTO FOCALIZADO (SUPERPOSICIÓN)... [Pulse ESC para salir]";
+                    statusDisplay.style.color = "var(--neon-pink)";
+                    updateFrame(); // Actualizamos para aplicar el transform de focus
+                });
+
+                helixContainer.appendChild(elDiv);
+            });
+        }
+
+        // --- MOTOR DE TECLADO REFINADO (TOPES) ---
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+
+            // --- GESTIÓN ESPECIAL DEL ESCAPE ---
+            if (e.key === 'Escape') {
+                resetFocus();
+                return; // Detener el motor de navegación
+            }
+
+            // Si estamos en focus/superposición, bloqueamos la navegación normal
+            if (nodeFocused) return;
+
+            const step = 5;           // Velocidad de rotación
+            const zoomStep = 50;      // Velocidad de zoom
+            const verticalStep = 40;  // Velocidad de navegación vertical
+
+            // Rotación A / D (Infinita, el centrado lo gestiona 'updateFrame')
+            if (key === 'a') currentRot += step;
+            if (key === 'd') currentRot -= step;
+
+            // Navegación Vertical Manual W / S (Para subir/bajar por la hélice)
+            if (key === 'w') currentYNav += verticalStep; // Subir carrusel (bajar hélice)
+            if (key === 's') currentYNav -= verticalStep; // Bajar carrusel (subir hélice)
+
+            // Zoom Q / E (Ajuste constante a Radius)
+            if (key === 'q') currentZoom += zoomStep;
+            if (key === 'e') currentZoom -= zoomStep;
+
+            // Reset Matriz (R)
+            if (key === 'r') {
+                currentRot = 0;
+                currentZoom = -radius; // Reset focal
+                currentYNav = 0;
+                resetFocus();
+            }
+
+            updateFrame();
+        });
+
+        // Inicialización
+        buildHelicalTable();
+        updateFrame();
+    </script>
+</body>
+
+</html>

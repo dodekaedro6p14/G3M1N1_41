@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Bio-Digital Forge | v1.0</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dna-bg"></div> <header>
+        <h1 class="neon-text">BIO-DIGITAL FORGE</h1>
+        <p>Protocolo Bio-Standard v1.0 Activo</p>
+    </header>
+
+    <main class="forge-container">
+        <section class="inventory">
+            <h3>Repositorio de Partes</h3>
+            <div class="card" draggable="true" id="pLac">Promotor: pLac</div>
+            <div class="card" draggable="true" id="GFP">Gen: GFP (Fluorescencia)</div>
+        </section>
+
+        <section class="workbench">
+            <h3>Módulo de Ensamblaje Virtual</h3>
+            <div id="drop-zone" class="drop-zone">Arrastra los BioBricks aquí</div>
+            <button onclick="synthesize()" class="btn-synthesize">SINTETIZAR ADN</button>
+        </section>
+
+        <section class="console-output">
+            <h3>Consola de Secuenciación</h3>
+            <div id="output-text" class="mono-font">Esperando instrucciones...</div>
+            <div id="stats" class="stats-panel"></div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="forge_logic.js"></script>
+</body>
+</html>

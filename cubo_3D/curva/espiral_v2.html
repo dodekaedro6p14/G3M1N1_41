@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Spiral - Editable Node Network</title>
+    <link rel="stylesheet" href="styles_v0.css">
+</head>
+<body>
+
+    <div class="filamentos-bg"></div>
+
+    <div class="stage">
+        <div class="carrusel" id="helix-table">
+            </div>
+    </div>
+
+    <div class="hub">
+        <div class="hub-title">CUANTICO_DOCS V2.0</div>
+        <div class="controles">
+            <span>CLIC PARA EDITAR</span>
+            <span>ESC: SALIR EDICIÓN</span>
+            |
+            <span>A / D</span> Girar
+            <span>W / S</span> Arriba/Abajo
+            <span>Q / E</span> Zoom
+            <span>R</span> Reset
+        </div>
+        <div id="status" style="font-size: 10px; color: #666;">ESTADO: ESTABLE</div>
+    </div>
+
+    <script>
+        const helixContainer = document.getElementById('helix-table');
+        const statusDisplay = document.getElementById('status');
+        
+        // --- CONFIGURACIÓN DE EXPANSIÓN (EDITABLE) ---
+        // Cambia este número para agregar más documentos automáticamente
+        const totalNodesToGenerate = 18; 
+
+        // Variables de estado
+        let currentRot = 0;
+        let currentZoom = -radius_calc(); // Empezamos a una distancia lógica
+        let currentYNav = 0; 
+
+        // Recuperamos las variables CSS para los cálculos
+        function radius_calc() {
+            return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--radius'));
+        }
+
+        const styleProps = getComputedStyle(document.documentElement);
+        const degPerElement = parseFloat(styleProps.getPropertyValue('--grados-por-elemento'));
+        const yDescendPerElement = parseFloat(styleProps.getPropertyValue('--descenso-por-elemento'));
+        const radius = radius_calc();
+
+        function buildEditableHelix() {
+            helixContainer.innerHTML = ''; // Limpiar
+
+            for (let index = 0; index < totalNodesToGenerate; index++) {
+                const elDiv = document.createElement('div');
+                elDiv.className = 'elemento';
+
+                // --- INYECCIÓN DEL TEXTO DE ORIGEN (EDITABLE) ---
+                // Agregamos 'contenteditable="true"' a los contenedores de texto
+                elDiv.innerHTML = `
+                    <div class="doc-header" contenteditable="true">NODO INF-0${String(index + 1).padStart(2, '0')}</div>
+                    <div class="doc-content" contenteditable="true">
+                        <p><strong>Interacción Cuántica detectada.</strong></p>
+                        <p>Analizando filamentos luminosos en la capa de datos... El vacío no es oscuridad, es energía en reposo esperando ser observada.</p>
+                        <hr style="border: 0.5px solid rgba(0,242,255,0.2)">
+                        <p>Este es un contenedor para documentos completos. La arquitectura CSS permite visualizar el contenido con un efecto de profundidad envolvente.</p>
+                        <p>Utiliza las funciones de teclado para desplazarte por la red de información.</p>
+                    </div>
+                `;
+
+                // --- LÓGICA DE POSICIONAMIENTO HELICAL (ESPIRAL) ---
+                
+                // 1. Ángulo
+                const theta = index * degPerElement;
+                
+                // 2. Altura Y (Descenso)
+                const yPos = index * yDescendPerElement;
+
+                // 3. Aplicamos la transformación 3D (Se mantiene igual, solo cambian valores)
+                elDiv.style.transform = `rotateY(${theta}deg) translateY(${yPos}px) translateZ(${radius}px)`;
+
+                helixContainer.appendChild(elDiv);
+            }
+        }
+
+        function updateFrame() {
+            // Aplicamos las transformaciones al contenedor global (carrusel)
+            // Se invierte el translateY para que parezca que bajamos por la espiral
+            helixContainer.style.transform = `
+                translateY(${-currentYNav}px) 
+                translateZ(${currentZoom}px) 
+                rotateY(${currentRot}deg)
+            `;
+        }
+
+        // MOTOR DE TECLADO
+        document.addEventListener('keydown', (e) => {
+            
+            // --- CORRECCIÓN: EVITAR NAVEGACIÓN SI SE ESTÁ EDITANDO TEXTO ---
+            // Si el elemento enfocado es editable, permitimos la escritura normal
+            // y desactivamos la rotación/zoom/navegación.
+            if (document.activeElement.isContentEditable) {
+                if (e.key === 'Escape') {
+                    document.activeElement.blur(); // Salir de edición
+                    statusDisplay.innerText = "ESTADO: ESTABLE (NAVEGACIÓN ACTIVA)";
+                    statusDisplay.style.color = "#666";
+                } else {
+                    statusDisplay.innerText = "ESTADO: EDITANDO DOCUMENTO...";
+                    statusDisplay.style.color = "#fff";
+                }
+                return; // Detener el motor de navegación
+            }
+
+            const key = e.key.toLowerCase();
+            const step = 4;           // Velocidad de rotación
+            const zoomStep = 40;      // Velocidad de zoom
+            const verticalStep = 30;  // Velocidad de navegación vertical
+
+            // Rotación A / D 
+            if (key === 'a') currentRot += step;
+            if (key === 'd') currentRot -= step;
+
+            // Navegación Vertical W / S (Subir/Bajar por la hélice)
+            if (key === 'w') currentYNav -= verticalStep;
+            if (key === 's') currentYNav += verticalStep;
+
+            // Zoom Q / E
+            if (key === 'q') currentZoom += zoomStep;
+            if (key === 'e') currentZoom -= zoomStep;
+
+            // Reset Matriz (R)
+            if (key === 'r') { 
+                currentRot = 0; 
+                currentZoom = -radius; 
+                currentYNav = 0; 
+            }
+
+            updateFrame();
+        });
+
+        // Inicialización
+        buildEditableHelix();
+        updateFrame();
+    </script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cubo 3D Interactivo</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #1a1a1a;
+            font-family: sans-serif;
+            color: white;
+        }
+
+        /* Contenedor en columna */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 200px;
+        }
+
+        /* Escena 3D */
+        .scene {
+            width: 200px;
+            height: 200px;
+            perspective: 600px;
+        }
+
+        /* El Cubo */
+        .cube {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            /* El transform se manejará con JS para la matriz */
+        }
+
+        /* Caras del cubo */
+        .face {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border: 2px solid #00ffcc;
+            background: rgba(0, 255, 204, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Posicionamiento inicial de las caras */
+        .front  { transform: rotateY(0deg) translateZ(100px); }
+        .back   { transform: rotateY(180deg) translateZ(100px); }
+        .right  { transform: rotateY(90deg) translateZ(100px); }
+        .left   { transform: rotateY(-90deg) translateZ(100px); }
+        .top    { transform: rotateX(90deg) translateZ(100px); }
+        .bottom { transform: rotateX(-90deg) translateZ(100px); }
+
+        /* Controles */
+        .controls {
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: #333;
+            color: #00ffcc;
+            border: 1px solid #00ffcc;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #00ffcc;
+            color: #1a1a1a;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="scene">
+            <div class="cube" id="cube">
+                <div class="face front">1</div>
+                <div class="face back">2</div>
+                <div class="face right">3</div>
+                <div class="face left">4</div>
+                <div class="face top">5</div>
+                <div class="face bottom">6</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="togglePause()">Pausa / Play</button>
+            <button onclick="adjustZoom(0.1)">Zoom +</button>
+            <button onclick="adjustZoom(-0.1)">Zoom -</button>
+        </div>
+    </div>
+
+    <script>
+        let angleX = 0;
+        let angleY = 0;
+        let scale = 1;
+        let isPaused = false;
+        const cube = document.getElementById('cube');
+
+        function animate() {
+            if (!isPaused) {
+                angleX += 0.01;
+                angleY += 0.01;
+                updateTransform();
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function updateTransform() {
+            // Aplicamos una matriz de rotación simple combinada con escala
+            // Usamos rotación en X e Y para el efecto 3D
+            cube.style.transform = `scale(${scale}) rotateX(${angleX}rad) rotateY(${angleY}rad)`;
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+        }
+
+        function adjustZoom(amount) {
+            scale += amount;
+            // Limitar el zoom para que no desaparezca o sea gigante
+            scale = Math.max(0.2, Math.min(scale, 2.5));
+            updateTransform();
+        }
+
+        // Iniciar animación
+        animate();
+    </script>
+</body>
+</html>

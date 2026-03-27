@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nana Bio-Database - Genomas Base</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #818cf8;
+            --accent: #e74c3c;
+            --bg-color: #0f172a;
+            --text: #333;
+            --white: #ffffff;
+            --black: #1e293b;
+            --color-fuente: #fff;
+            --color_fondo: #000;
+            --card-bg: #161b22;
+            --text-color: #c9d1d9;
+            --accent-color: #58a6ff;
+            --energy-color: #f9e231;
+            --border-color: #30363d;
+            --footer-color: #8b949e;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--color-fuente);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: var(--accent-color);
+            text-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
+        }
+
+        /* Contenedor de la Base de Datos */
+        .db-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        /* Tarjeta de Especie */
+        .species-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .species-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--secondary);
+        }
+
+        .species-title {
+            color: var(--energy-color);
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .scientific-name {
+            font-style: italic;
+            color: var(--footer-color);
+            font-size: 0.9em;
+        }
+
+        .traits {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .trait-badge {
+            background: var(--black);
+            color: var(--accent-color);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Visualizador de ADN */
+        .dna-viewer {
+            background: var(--color_fondo);
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            padding: 15px;
+            position: relative;
+        }
+
+        .dna-viewer h4 {
+            margin: 0 0 10px 0;
+            color: var(--secondary);
+            font-size: 0.9em;
+        }
+
+        textarea.sequence {
+            width: 100%;
+            height: 150px;
+            background: transparent;
+            color: #10b981; /* Verde matriz para el ADN */
+            border: none;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85em;
+            line-height: 1.4;
+            resize: none;
+            outline: none;
+        }
+
+        .stats {
+            margin-top: 10px;
+            font-size: 0.8em;
+            color: var(--text-color);
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🧬 Bio-Database NCBI: Especies Base</h1>
+        <p style="color: var(--text-color);">Genoteca para el Proyecto de Simulación Evolutiva</p>
+    </div>
+
+    <div class="db-container">
+
+        <div class="species-card">
+            <h2 class="species-title">Flor de Loto <br><span class="scientific-name">Nelumbo nucifera</span></h2>
+            <div class="traits">
+                <span class="trait-badge">Acuática</span>
+                <span class="trait-badge">Simetría Radial</span>
+                <span class="trait-badge">Rosado/Blanco</span>
+            </div>
+            <p style="font-size: 0.9em; color: var(--text-color);">Planta sagrada conocida por su pureza. Su ADN promueve pétalos anchos y un centro expansivo.</p>
+            
+            <div class="dna-viewer">
+                <h4>Marcador: Gen rbcL (Cloroplasto)</h4>
+                <textarea class="sequence" readonly>ATGTCACCACAAACAGAGACTAAAGCAAGTGTTGGATTCAAAGCTGGTGTTAAAGAGTACAAATTGACTTATTATACTCCTGAGTACCAAACCAAGGATACTGATATATTGGCAGCATTCCGAGTAACTCCTCAACCTGGAGTTCCGCCTGAAGAAGCAGGGGCCGCGGTAGCTGCCGAATCTTCTACTGGTACATGGACAACTGTGTGGACCGATGGACTTACCAGCCTTGATCGTTACAAAGGGCGATGCTACCACATCGAGCCCGTTGCTGGAGAAGAAAGCCAATTTATTGCTTATGTAGCTTACCCTTTAGACCTTTTTGAAGAAGGTTCTGTTACTAACATGTTTACTTCCATTGTGGGTAACGTATTTGGGTTCAAAGCCCTGCGC</textarea>
+                <div class="stats">
+                    <span>Longitud: 401 bp</span>
+                    <span>GC: 43.6%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="species-card">
+            <h2 class="species-title">Pasionaria (Trepadora) <br><span class="scientific-name">Passiflora incarnata</span></h2>
+            <div class="traits">
+                <span class="trait-badge">Enredadera</span>
+                <span class="trait-badge">Morfología Compleja</span>
+                <span class="trait-badge">Púrpura/Azul</span>
+            </div>
+            <p style="font-size: 0.9em; color: var(--text-color);">Desarrolla zarcillos para trepar. Su flor tiene una estructura de corona de filamentos única.</p>
+            
+            <div class="dna-viewer">
+                <h4>Marcador: Gen rbcL (Cloroplasto)</h4>
+                <textarea class="sequence" readonly>ATGTCACCACAAACAGAGACTAAAGCAAGTGTTGGATTCAAAGCTGGTGTTAAAGAGTATAAATTGACTTATTATACTCCTGAGTATCAAACCAAGGATACTGATATATTGGCAGCATTCCGAGTAACTCCTCAACCTGGAGTTCCACCTGAAGAAGCAGGGGCCGCGGTAGCTGCCGAATCTTCTACTGGTACATGGACAACTGTGTGGACCGATGGACTTACCAGCCTTGATCGTTACAAAGGACGATGCTACCACATCGAGCCCGTTGCTGGAGAAGAAAGCCAATTTATTGCTTATGTAGCTTATCCTTTAGACCTTTTTGAAGAAGGTTCTGTTACTAACATGTTTACTTCCATTGTAGGTAATGTATTTGGGTTCAAAGCCCTGCGC</textarea>
+                <div class="stats">
+                    <span>Longitud: 401 bp</span>
+                    <span>GC: 42.8%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="species-card">
+            <h2 class="species-title">Cactus Estrella <br><span class="scientific-name">Astrophytum asterias</span></h2>
+            <div class="traits">
+                <span class="trait-badge">Suculenta</span>
+                <span class="trait-badge">Geometría Estrellada</span>
+                <span class="trait-badge">Dorado/Verde</span>
+            </div>
+            <p style="font-size: 0.9em; color: var(--text-color);">Cactus sin espinas con un patrón geométrico perfecto. Alta resistencia y floración apical.</p>
+            
+            <div class="dna-viewer">
+                <h4>Marcador: Gen rbcL (Cloroplasto)</h4>
+                <textarea class="sequence" readonly>ATGTCACCACAAACAGAAACTAAAGCAAGTGTTGGATTCAAAGCTGGTGTTAAAGAATACAAATTGACTTATTATACTCCTGAGTACCAAACCAAGGATACTGATATATTGGCAGCATTCCGAGTAACTCCTCAACCCGGAGTTCCGCCTGAAGAAGCAGGGGCCGCGGTAGCTGCCGAATCTTCTACTGGTACATGGACAACTGTATGGACCGATGGACTTACCAGCCTTGATCGTTACAAAGGGCGATGCTACCACATCGAGCCTGTTGCTGGAGAAGAAAACCAATTTATTGCTTATGTAGCTTACCCTTTAGACCTTTTTGAAGAAGGTTCTGTTACTAACATGTTTACTTCCATTGTGGGTAACGTATTTGGATTCAAAGCCCTGCGC</textarea>
+                <div class="stats">
+                    <span>Longitud: 401 bp</span>
+                    <span>GC: 43.1%</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>     

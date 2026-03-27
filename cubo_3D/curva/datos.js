@@ -1,0 +1,20 @@
+const datosNodos = [
+    { titulo: "NODO 01", texto: "Descripción 1", imagen: "ruta1.jpg", id: "01" },
+    { titulo: "NODO 02", texto: "Descripción 2", imagen: "ruta2.jpg", id: "02" },
+    { titulo: "NODO 03", texto: "Descripción 3", imagen: "", id: "03" },
+    { titulo: "NODO 04", texto: "Descripción 4", imagen: "", id: "04" },
+    { titulo: "NODO 05", texto: "Descripción 5", imagen: "", id: "05" },
+    { titulo: "NODO 06", texto: "Descripción 6", imagen: "", id: "06" },
+    { titulo: "NODO 07", texto: "Esta es una demostracionde texto", imagen: "", id: "07" },
+    { titulo: "NODO 08", texto: "Descripción 8", imagen: "", id: "08" },
+    { titulo: "NODO 09", texto: "Descripción 9", imagen: "", id: "09" },
+    { titulo: "NODO 10", texto: "Descripción 10", imagen: "", id: "10" },
+    { titulo: "NODO 11", texto: "Descripción 11", imagen: "", id: "11" },
+    { titulo: "NODO 12", texto: "Descripción 12", imagen: "", id: "12" },
+    { titulo: "NODO 13", texto: "Descripción 11", imagen: "", id: "13" },
+    { titulo: "NODO 14", texto: "Descripción 12", imagen: "", id: "14" },
+    { titulo: "NODO 15", texto: "Descripción 11", imagen: "", id: "15" },
+    { titulo: "NODO 16", texto: "Descripción 12", imagen: "", id: "16" },
+    { titulo: "NODO 17", texto: "Descripción 11", imagen: "", id: "17" },
+    { titulo: "NODO 18", texto: "esto es una demostracionde una cadena de texto", imagen: "", id: "18" }
+];

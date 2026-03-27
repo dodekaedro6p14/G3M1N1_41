@@ -1,0 +1,10 @@
+Notas adicionales para tu investigación:
+
+Bioinformática (BLAST): Para integrar algoritmos de alineamiento en tu web, te recomiendo usar la API de NCBI BLAST. 
+Puedes hacer llamadas asíncronas con JavaScript para comparar secuencias de ADN de hongos recolectados con bases de datos globales.
+
+Modelado 3D: En sitios como CGTrader, busca estructuras de Cápsides Virales o Ribosomas. 
+Estos modelos pueden servirte para visualizar cómo el sistema CRISPR-Cas9 interactúa físicamente con la doble hélice del ADN fúngico.
+
+Hongos y Energía: No olvides investigar las Celdas de Combustible Microbianas (MFC), 
+donde se utilizan hongos para generar electrones a partir de la descomposición de materia orgánica, creando "baterías biológicas" vivas.

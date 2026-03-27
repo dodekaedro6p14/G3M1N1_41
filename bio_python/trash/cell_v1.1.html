@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador Celular Humano - Dark Lab</title>
+    
+    <style>
+        :root {
+            /* Paleta estándar definida */
+            --primary: #2c3e50;
+            --secondary: #818cf8;
+            --accent: #e74c3c;
+            --bg-color: #0d1117; /* Ajuste para fondo orgánico más profundo */
+            --text-color: #c9d1d9;
+            --white: #ffffff;
+            --black: #1e293b;
+            --card-bg: #161b22;
+            --accent-color: #58a6ff; /* Color de fluorescencia para la membrana */
+            --border-color: #30363d;
+            --energy-color: #f9e231;
+
+            /* Mis adiciones específicas para el realismo celular */
+            --cytoplasm-color: rgba(22, 27, 34, 0.7); /* Interior de la célula (semi-transparente) */
+            --membrane-glow: 0 0 25px rgba(88, 166, 255, 0.6); /* Brillo de la membrana */
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden; /* Mantenemos la vista fija */
+            background-color: var(--bg-color); /* Líquido extracelular */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color);
+        }
+
+        /* FONDO ANIMADO DE PARTÍCULAS (Como el original celula.html) */
+        #canvas-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* Detrás de la célula */
+        }
+
+        /* CONTENEDOR PRINCIPAL DE LA CÉLULA */
+        .cell-container {
+            position: relative;
+            z-index: 10; /* Encima del fondo */
+            width: 80vh; /* La célula será circular basada en la altura */
+            height: 80vh;
+            margin: 10vh auto; /* Centrada verticalmente */
+            background-color: var(--cytoplasm-color); /* Citoplasma */
+            border-radius: 50%;
+            border: 4px solid var(--accent-color); /* Membrana Plasmática */
+            box-shadow: var(--membrane-glow); /* Brillo orgánico */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: breathe 8s infinite ease-in-out; /* Animación de pulso */
+        }
+
+        /* ANIMACIÓN DE PULSO DE LA CÉLULA */
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(88, 166, 255, 0.4); }
+            50% { transform: scale(1.02); box-shadow: 0 0 35px rgba(88, 166, 255, 0.7); }
+        }
+
+        /* ESTILO PARA LAS ORGANELAS EDITABLES */
+        .organelle {
+            position: absolute; /* Para ubicarlas donde queramos dentro de la célula */
+            transition: all 0.3s ease; /* Transición suave al pasar el mouse */
+            cursor: pointer; /* Indica que es seleccionable */
+            z-index: 20;
+        }
+
+        /* Efecto al pasar el mouse sobre una organela */
+        .organelle:hover {
+            transform: scale(1.1); /* Agranda ligeramente */
+            filter: drop-shadow(0 0 10px var(--energy-color)); /* Añade brillo de selección */
+        }
+
+        /* Posicionamiento y tamaño de imágenes dentro del enlace */
+        .organelle img {
+            display: block;
+            width: 100%; /* La imagen se ajusta al tamaño del enlace */
+            height: auto;
+        }
+
+        /* Panel de Información Lateral */
+        .info-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            background-color: rgba(22, 27, 34, 0.9);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas-particles"></canvas>
+
+    <div class="info-panel">
+        <h2 style="color:var(--accent-color); margin-top:0;">Visualizador Celular</h2>
+        <p>Selecciona una organela para ver detalles o haz clic para ir a su página dedicada.</p>
+    </div>
+
+    <div class="cell-container">
+        
+        <a href="mitocondria_detalle.html" class="organelle" style="width: 100px; top: 20%; left: 30%;">
+            <img src="https://via.placeholder.com/100x50/f9e231/000000?text=Mitocondria" alt="Mitocondria">
+        </a>
+
+        <a href="nucleo_detalle.html" class="organelle" style="width: 200px; top: calc(50% - 100px); left: calc(50% - 100px);">
+            <img src="https://via.placeholder.com/200x200/818cf8/ffffff?text=Núcleo" alt="Núcleo">
+        </a>
+        
+        </div>
+
+    <script>
+        const canvas = document.getElementById('canvas-particles');
+        const ctx = canvas.getContext('2d');
+        let particlesArray;
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        class Particle {
+            constructor(x, y, directionX, directionY, size, color) {
+                this.x = x;
+                this.y = y;
+                this.directionX = directionX;
+                this.directionY = directionY;
+                this.size = size;
+                this.color = color;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                ctx.fillStyle = '#c9d1d91a'; // Partículas muy sutiles en el fondo
+                ctx.fill();
+            }
+            update() {
+                if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX;
+                if (this.y > canvas.height || this.y < 0) this.directionY = -this.directionY;
+                this.x += this.directionX;
+                this.y += this.directionY;
+                this.draw();
+            }
+        }
+
+        function init() {
+            particlesArray = [];
+            // Ajusta el número de partículas para que no sature
+            let numberOfParticles = (canvas.height * canvas.width) / 9000;
+            for (let i = 0; i < numberOfParticles; i++) {
+                let size = (Math.random() * 2) + 1;
+                let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
+                let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+                let directionX = (Math.random() * 0.2) - 0.1; // Movimiento más lento y orgánico
+                let directionY = (Math.random() * 0.2) - 0.1;
+                let color = '#c9d1d91a';
+                particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0, 0, innerWidth, innerHeight);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+            }
+        }
+        
+        // Ajuste de canvas al redimensionar ventana
+        window.addEventListener('resize', function(){
+            canvas.width = innerWidth;
+            canvas.height = innerHeight;
+            init();
+        });
+
+        init();
+        animate();
+    </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+ body {
+     margin: 0;
+     background-color: #050508;
+     color: #00fbff;
+     font-family: 'Courier New', Courier, monospace;
+     overflow: hidden;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     height: 100vh;
+     /* Toque de atmósfera cósmica */
+     background: radial-gradient(circle at center, #1a0b2e 0%, #050508 100%);
+ }
+
+ #background-guide {
+     position: absolute;
+     width: 500px;
+     height: 500px;
+     opacity: 0.3;
+     background-image: url('TU_IMAGEN_AQUI.jpg');
+     background-size: contain;
+     background-repeat: no-repeat;
+     background-position: center;
+     pointer-events: none;
+     z-index: 1;
+ }
+
+ canvas {
+     display: block;
+     position: relative;
+     z-index: 2;
+     cursor: crosshair;
+ }
+
+ /* ESTILIZACIÓN DEL PANEL DE CONTROLES AL ESTILO FRUTA */
+ #panel-info {
+     position: absolute;
+     top: 20px;
+     left: 20px;
+     border-left: 3px solid #ff006e;
+     padding: 15px;
+     background: rgba(10, 5, 20, 0.85);
+     box-shadow: 0 0 15px rgba(255, 0, 110, 0.3);
+     border-radius: 0 10px 10px 0;
+     backdrop-filter: blur(5px);
+     z-index: 10;
+ }
+
+ .control-group {
+     margin-top: 15px;
+     padding-top: 10px;
+     border-top: 1px solid rgba(0, 251, 255, 0.2);
+ }
+
+ label {
+     font-size: 11px;
+     color: #ffb3ff;
+     display: flex;
+     justify-content: space-between;
+     margin-bottom: 5px;
+     align-items: center;
+ }
+
+ input[type="range"] {
+     width: 100px;
+     accent-color: #00fbff;
+ }
+
+ input[type="color"] {
+     background: none;
+     border: none;
+     width: 25px;
+     height: 25px;
+     cursor: pointer;
+ }

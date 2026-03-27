@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microcosmos: El Núcleo Celular</title>
+    <style>
+        :root {
+            --bg-dark: #1a1a2e;
+            --n-outer: #5c6bc0;
+            --n-inner: #3949ab;
+            --nucleolus: #1a237e;
+            --dna: #818cf8;
+            --text-color: #ffffff;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-dark);
+            font-family: 'Segoe UI', sans-serif;
+            color: var(--text-color);
+        }
+
+        /* Contenedor de Vistas */
+        .page {
+            display: none;
+            width: 100vw; height: 100vh;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            transition: opacity 0.6s ease;
+        }
+
+        .active { display: flex; flex-direction: column; }
+
+        /* --- ESTILO DEL NÚCLEO (VISTA PRINCIPAL) --- */
+        .nucleus-focus {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, var(--n-outer), var(--n-inner));
+            border-radius: 50%;
+            position: relative;
+            border: 6px dashed rgba(255,255,255,0.3);
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 0 50px rgba(92, 107, 192, 0.5);
+            animation: organic-float 10s infinite alternate ease-in-out;
+            cursor: pointer;
+        }
+
+        /* Componentes Internos */
+        .chromatin {
+            position: absolute;
+            width: 80%; height: 80%;
+            border: 2px solid var(--dna);
+            border-radius: 40% 60% 30% 70% / 60% 30% 70% 40%;
+            opacity: 0.4;
+            animation: rotate-slow 20s infinite linear;
+        }
+
+        .nucleolus-inner {
+            width: 100px; height: 100px;
+            background: var(--nucleolus);
+            border-radius: 50%;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            transition: 0.3s;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 10;
+        }
+
+        /* Tooltip de Nombre */
+        .info-tag {
+            position: absolute;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            transform: translateY(-20px);
+            z-index: 100;
+        }
+
+        .nucleus-focus:hover .info-tag { opacity: 1; }
+
+        /* --- VISTA EDITABLE (DESTINO DEL CLIC) --- */
+        #edit-page {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 20px;
+        }
+
+        .editor-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 30px;
+            max-width: 600px;
+            width: 90%;
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        textarea {
+            width: 100%; height: 150px;
+            background: rgba(0,0,0,0.3);
+            color: #818cf8;
+            border: 1px solid #5c6bc0;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: monospace;
+            margin: 20px 0;
+        }
+
+        .btn-back {
+            background: var(--n-outer);
+            color: white; border: none;
+            padding: 10px 25px; border-radius: 5px;
+            cursor: pointer; transition: 0.3s;
+        }
+
+        .btn-back:hover { background: var(--dna); }
+
+        /* --- ANIMACIONES --- */
+        @keyframes organic-float {
+            0% { border-radius: 50%; transform: scale(1) translate(0,0); }
+            50% { border-radius: 45% 55% 50% 50%; transform: scale(1.05) translate(10px, -10px); }
+            100% { border-radius: 55% 45% 55% 45%; transform: scale(1) translate(-5px, 5px); }
+        }
+
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Fondo de partículas */
+        #bg-canvas {
+            position: fixed; top: 0; left: 0; z-index: -1;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <div id="home-page" class="page active">
+        <h2 style="margin-bottom: 30px; letter-spacing: 5px;">CENTRO DE CONTROL</h2>
+        
+        <div class="nucleus-focus" onclick="goToEdit()">
+            <div class="info-tag" id="nucleus-label">NÚCLEO CELULAR</div>
+            <div class="chromatin"></div>
+            <div class="chromatin" style="animation-delay: -5s; border-color: #c084fc;"></div>
+            <div class="nucleolus-inner">
+                <span style="font-size: 0.6rem; opacity: 0.5;">NUCLEOLO</span>
+            </div>
+        </div>
+        
+        <p style="margin-top: 30px; opacity: 0.6;">Haz clic en el núcleo para entrar al editor</p>
+    </div>
+
+    <div id="edit-page" class="page">
+        <div class="editor-container">
+            <h1 id="page-title">Bienvenido al Interior</h1>
+            <p id="page-desc">Este es un espacio que puedes personalizar. Modifica el texto a continuación:</p>
+            
+            <textarea id="custom-text">
+// Aquí puedes escribir lo que quieras
+// Esta sección simula una página interna
+// del núcleo donde guardas información crítica.
+            </textarea>
+
+            <br>
+            <button class="btn-back" onclick="goHome()">← Regresar al Microcosmos</button>
+        </div>
+    </div>
+
+    <script>
+        // --- LÓGICA DE NAVEGACIÓN ---
+        function goToEdit() {
+            document.getElementById('home-page').classList.remove('active');
+            document.getElementById('edit-page').classList.add('active');
+        }
+
+        function goHome() {
+            document.getElementById('edit-page').classList.remove('active');
+            document.getElementById('home-page').classList.add('active');
+        }
+
+        // --- DINÁMICA DEL MOUSE (ETIQUETA) ---
+        const nucleus = document.querySelector('.nucleus-focus');
+        const tag = document.getElementById('nucleus-label');
+
+        nucleus.addEventListener('mousemove', (e) => {
+            const x = e.offsetX;
+            const y = e.offsetY;
+            tag.style.left = x + 'px';
+            tag.style.top = (y - 40) + 'px';
+        });
+
+        // --- FONDO ANIMADO DE PARTÍCULAS (JavaScript) ---
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.onresize = resize;
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.y < 0) this.y = canvas.height;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(129, 140, 248, 0.2)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 80; i++) particles.push(new Particle());
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+</html>

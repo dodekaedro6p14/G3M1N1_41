@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Periodic Helix - Descending View</title>
+    <style>
+        :root {
+            /* --- VARIABLES DE DISEÑO --- */
+            --neon-cyan: #00f2ff;
+            --neon-pink: #ff00e1;
+            --glass-bg: rgba(0, 20, 30, 0.6);
+            
+            /* --- VARIABLES DE LA HÉLICE (EDITABLES) --- */
+            --radius: 600px;           /* Radio de la espiral */
+            --descenso-por-elemento: 20px; /* Cuánto baja cada elemento en el eje Y */
+            --grados-por-elemento: 25.7deg; /* Ángulo entre elementos (360 / 14 = ~25.7) */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(circle at center, #0a0a1a 0%, #000 100%);
+            color: white;
+            font-family: 'Orbitron', 'Segoe UI', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1500px; /* Profundidad global */
+        }
+
+        /* ESCENARIO 3D */
+        .stage {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform-style: preserve-3d;
+        }
+
+        /* CARRUSEL (Contenedor de la Espiral) */
+        .carrusel {
+            transform-style: preserve-3d;
+            transition: transform 0.2s cubic-bezier(0.1, 0.8, 0.2, 1);
+            will-change: transform;
+            position: relative;
+        }
+
+        /* ELEMENTOS (CELDAS INDIVIDUALES) */
+        .elemento {
+            position: absolute; /* Importante para el posicionamiento helical */
+            width: 110px;
+            height: 110px;
+            background: var(--glass-bg);
+            border: 1px solid var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            backface-visibility: hidden; /* Oculta la parte de atrás para mayor claridad */
+        }
+
+        .elemento:hover {
+            background: var(--neon-cyan);
+            color: black;
+            box-shadow: 0 0 30px var(--neon-cyan);
+            transform: scale(1.1) translateZ(30px) !important; /* Mantenemos la escala sobre la transformación helical */
+        }
+
+        .simbolo { font-size: 2.2rem; font-weight: bold; }
+        .numero { font-size: 0.8rem; align-self: flex-start; padding-left: 8px; font-family: monospace; }
+        .nombre { font-size: 8px; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* HUD - PANEL DE CONTROL INFERIOR */
+        .hub {
+            position: fixed;
+            bottom: 20px;
+            width: 90%;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--neon-pink);
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 -10px 25px rgba(255, 0, 225, 0.15);
+        }
+
+        .hub-title { color: var(--neon-pink); font-weight: bold; font-size: 1.1rem; }
+        .controles span {
+            color: var(--neon-cyan);
+            border: 1px solid var(--neon-cyan);
+            padding: 4px 8px;
+            margin: 0 5px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-family: monospace;
+        }
+
+        /* Fondo Decorativo de Filamentos Luminosos */
+        .filamentos-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                radial-gradient(circle at center, #101525 0%, #000 100%),
+                url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="filamentos-bg"></div>
+
+    <div class="stage">
+        <div class="carrusel" id="helix-table">
+            </div>
+    </div>
+
+    <div class="hub">
+        <div class="hub-title">HELIX_PERIODIC V1.0</div>
+        <div class="controles">
+            <span>A / D</span> Girar Hélice
+            <span>W / S</span> Navegación Vertical
+            <span>Q / E</span> Zoom
+            <span>R</span> Reset Matriz
+        </div>
+        <div id="status" style="font-size: 10px; color: #666;">ESTADO: ESTABLE</div>
+    </div>
+
+    <script>
+        const helixContainer = document.getElementById('helix-table');
+        
+        // --- DATA DE EJEMPLO ---
+        // (La misma que la anterior, pero la procesaremos en orden)
+        const rawData = [
+            {n:1, s:'H', name:'Hidrógeno'}, {n:3, s:'Li', name:'Litio'},
+            {n:4, s:'Be', name:'Berilio'}, {n:12, s:'Mg', name:'Magnesio'},
+            {n:21, s:'Sc', name:'Escandio'}, {n:39, s:'Y', name:'Itrio'},
+            {n:22, s:'Ti', name:'Titanio'}, {n:40, s:'Zr', name:'Circonio'},
+            {n:23, s:'V', name:'Vanadio'}, {n:41, s:'Nb', name:'Niobio'},
+            {n:74, s:'W', name:'Wolframio'}, {n:106, s:'Sg', name:'Seaborgio'},
+            {n:2, s:'He', name:'Helio'}, {n:10, s:'Ne', name:'Neón'}
+        ];
+
+        // Ordenamos los datos por número atómico para que la espiral sea lógica
+        const periodicData = rawData.sort((a, b) => a.n - b.n);
+
+        // Variables de estado
+        let currentRot = 0;
+        let currentZoom = -400;
+        let currentYNav = 0; // Para la navegación vertical (W/S)
+
+        // Recuperamos las variables CSS para los cálculos
+        const styleProps = getComputedStyle(document.documentElement);
+        const degPerElement = parseFloat(styleProps.getPropertyValue('--grados-por-elemento'));
+        const yDescendPerElement = parseFloat(styleProps.getPropertyValue('--descenso-por-elemento'));
+        const radius = parseFloat(styleProps.getPropertyValue('--radius'));
+
+        function buildHelicalTable() {
+            helixContainer.innerHTML = ''; // Limpiar por seguridad
+
+            periodicData.forEach((el, index) => {
+                const elDiv = document.createElement('div');
+                elDiv.className = 'elemento';
+                elDiv.innerHTML = `
+                    <div class="numero">${el.n}</div>
+                    <div class="simbolo">${el.s}</div>
+                    <div class="nombre">${el.name}</div>
+                `;
+
+                // --- LÓGICA DE POSICIONAMIENTO HELICAL (ESPIRAL) ---
+                
+                // 1. Ángulo: Calculamos el ángulo en grados (360 infinitos)
+                const theta = index * degPerElement;
+                
+                // 2. Altura Y: Calculamos el descenso
+                // Empezamos en negativo (arriba) para que el centro sea Y=0
+                const halfTotalHeight = (periodicData.length / 2) * yDescendPerElement;
+                const yPos = -halfTotalHeight + (index * yDescendPerElement);
+
+                // 3. Aplicamos la transformación 3D
+                // IMPORTANTE: El orden de la transformación es clave:
+                // a) Girar en el ángulo (rotateY)
+                // b) Mover arriba/abajo (translateY)
+                // c) Empujar fuera del centro (translateZ)
+                elDiv.style.transform = `rotateY(${theta}deg) translateY(${yPos}px) translateZ(${radius}px)`;
+
+                helixContainer.appendChild(elDiv);
+            });
+        }
+
+        function updateFrame() {
+            // Aplicamos las transformaciones al contenedor global (carrusel)
+            helixContainer.style.transform = `
+                translateY(${currentYNav}px) 
+                translateZ(${currentZoom}px) 
+                rotateY(${currentRot}deg)
+            `;
+        }
+
+        // MOTOR DE TECLADO
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            const step = 4;           // Velocidad de rotación
+            const zoomStep = 40;      // Velocidad de zoom
+            const verticalStep = 30;  // Velocidad de navegación vertical
+
+            // Rotación A / D (Ahora infinita, sin topes)
+            if (key === 'a') currentRot += step;
+            if (key === 'd') currentRot -= step;
+
+            // Navegación Vertical W / S
+            // (W sube el "carrusel", lo que te hace sentir que bajas por la hélice)
+            if (key === 'w') currentYNav += verticalStep;
+            if (key === 's') currentYNav -= verticalStep;
+
+            // Zoom Q / E
+            if (key === 'q') currentZoom += zoomStep;
+            if (key === 'e') currentZoom -= zoomStep;
+
+            // Reset Matriz (R)
+            if (key === 'r') { 
+                currentRot = 0; 
+                currentZoom = -400; 
+                currentYNav = 0; 
+            }
+
+            updateFrame();
+        });
+
+        // Inicialización
+        buildHelicalTable();
+        updateFrame();
+    </script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocolo Golgi: Logística Celular</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #818cf8;
+            --accent: #e74c3c;
+            --bg-color: #0f172a;
+            --text: #333;
+            --white: #ffffff;
+            --black: #1e293b;
+            --color-fuente: #fff;
+            --color_fondo: #000;
+            --card-bg: #161b22;
+            --text-color: #c9d1d9;
+            --accent-color: #58a6ff;
+            --energy-color: #f9e231;
+            --border-color: #30363d;
+            --footer-color: #8b949e;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--black), var(--primary));
+            padding: 3rem;
+            text-align: center;
+            border-bottom: 2px solid var(--secondary);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .golgi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        h2 { color: var(--accent-color); }
+
+        .highlight { color: var(--energy-color); font-weight: bold; }
+
+        /* Animación de Vesículas */
+        .vesicle {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            filter: blur(1px);
+            z-index: 0;
+            opacity: 0.6;
+        }
+
+        .tech-box {
+            background: rgba(129, 140, 248, 0.1);
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            margin: 20px 0;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 0.8rem 1.5rem;
+            background-color: var(--secondary);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+
+        .btn-back:hover {
+            transform: scale(1.05);
+            background-color: var(--accent-color);
+        }
+
+        footer { text-align: center; padding: 2rem; color: var(--footer-color); }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Aparato de Golgi</h1>
+    <p>Hub de Procesamiento, Empaquetado y Distribución</p>
+</header>
+
+<div class="container" id="main-container">
+    <div class="golgi-card">
+        <h2>1. Procesamiento de Exportación</h2>
+        <p>El Aparato de Golgi recibe proteínas del Retículo Endoplásmico Rugoso (RER). A través de sus cisternas (Cis, Medial y Trans), realiza una secuencia de reacciones químicas:</p>
+        
+        <div class="tech-box">
+            > INICIANDO GLICOSILACIÓN...<br>
+            > AGREGANDO GRUPOS SULFATO...<br>
+            > ETIQUETANDO MANOSA-6-FOSFATO (DESTINO: LISOSOMA)...
+        </div>
+
+        <h2>2. Cara Cis y Cara Trans</h2>
+        <ul>
+            <li><span class="highlight">Cara Cis:</span> Estación de recepción. Fusión de vesículas de transporte.</li>
+            <li><span class="highlight">Cara Trans:</span> Estación de despacho. Formación de vesículas secretoras y lisosomas.</li>
+        </ul>
+
+        <h2>3. Importancia en Bio-Ingeniería</h2>
+        <p>Entender el Golgi es vital para la Biología Sintética; si modificamos una proteína pero el Golgi no la etiqueta correctamente, esta nunca llegará a su destino funcional (como la membrana plasmática).</p>
+
+        <center>
+            <a href="javascript:history.back()" class="btn-back">Volver</a>
+        </center>
+    </div>
+</div>
+
+<footer>
+    <p>© 2024 Bio-Ingeniería Molecular | Protocolo G-02</p>
+</footer>
+
+<script>
+    // Animación de flujo de vesículas
+    function createVesicle() {
+        const vesicle = document.createElement('div');
+        vesicle.classList.add('vesicle');
+        
+        // Posición inicial aleatoria
+        const startX = Math.random() * window.innerWidth;
+        const startY = Math.random() * window.innerHeight;
+        
+        vesicle.style.left = startX + 'px';
+        vesicle.style.top = startY + 'px';
+        
+        document.body.appendChild(vesicle);
+
+        // Movimiento suave
+        const animation = vesicle.animate([
+            { transform: 'translate(0, 0)', opacity: 0.6 },
+            { transform: `translate(${Math.random() * 200 - 100}px, ${Math.random() * -300}px)`, opacity: 0 }
+        ], {
+            duration: 3000 + Math.random() * 2000,
+            easing: 'ease-out'
+        });
+
+        animation.onfinish = () => vesicle.remove();
+    }
+
+    // Crear vesículas periódicamente
+    setInterval(createVesicle, 400);
+</script>
+
+</body>
+</html>

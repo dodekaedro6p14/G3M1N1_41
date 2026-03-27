@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toroide Cuántico 3D</title>
+    <style>
+        /* Estilos CSS Oscuros */
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #08080c; /* Fondo oscuro espacial */
+            font-family: 'Courier New', Courier, monospace;
+            color: #00ffff; /* Texto neón */
+        }
+        #ui-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px #00ffff55;
+            pointer-events: none; /* Deja que los clics pasen al lienzo 3D si es necesario */
+        }
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        li { margin-bottom: 5px; }
+        .key {
+            background-color: #00ffff;
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ui-container">
+        <h1>Control del Toroide</h1>
+        <ul>
+            <li><span class="key">W</span> / <span class="key">S</span> : Rotar eje X</li>
+            <li><span class="key">A</span> / <span class="key">D</span> : Rotar eje Y</li>
+            <li><span class="key">Q</span> / <span class="key">E</span> : Zoom (Alejar/Acercar)</li>
+        </ul>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // 1. Configuración de la Escena, Cámara y Renderizador
+        const scene = new THREE.Scene();
+        // Agregamos un poco de niebla para dar profundidad cuántica
+        scene.fog = new THREE.FogExp2(0x08080c, 0.02);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 30; // Posición inicial de la cámara
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // 2. Creación del Toroide (Radio principal, Radio del tubo, Segmentos radiales, Segmentos tubulares)
+        const geometry = new THREE.TorusGeometry(10, 3, 30, 100);
+        
+        // Material de malla de alambre (Wireframe) para imitar las líneas de diseño gráfico
+        const material = new THREE.MeshBasicMaterial({ 
+            color: 0x00ffff, // Color cian neón
+            wireframe: true,
+            transparent: true,
+            opacity: 0.8
+        });
+        
+        const torus = new THREE.Mesh(geometry, material);
+        scene.add(torus);
+
+        // --- ESTA ES LA LÍNEA QUE DEBES AGREGAR O EDITAR ---
+        torus.rotation.x = Math.PI / 2; // Rota el toroide 90 grados para que quede horizontal
+        // ----
+
+        // 3. Variables para el control de movimiento
+        let rotationSpeedX = 0;
+        let rotationSpeedY = 0;
+        const ROTATION_ACCELERATION = 0.05;
+        const FRICTION = 0.95; // Para que el movimiento sea suave
+
+        // 4. Controles por Teclado
+        document.addEventListener('keydown', (event) => {
+            const key = event.key.toLowerCase();
+            
+            // Rotación Y (A / D)
+            if (key === 'a') rotationSpeedY -= ROTATION_ACCELERATION;
+            if (key === 'd') rotationSpeedY += ROTATION_ACCELERATION;
+            
+            // Rotación X (W / S)
+            if (key === 'w') rotationSpeedX -= ROTATION_ACCELERATION;
+            if (key === 's') rotationSpeedX += ROTATION_ACCELERATION;
+            
+            // Zoom (Q / E)
+            if (key === 'q') camera.position.z += 1; // Alejar
+            if (key === 'e') camera.position.z -= 1; // Acercar
+        });
+
+        // 5. Ajuste responsivo al cambiar el tamaño de la ventana
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // 6. Bucle de Animación
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Aplicar velocidad de rotación
+            torus.rotation.x += rotationSpeedX;
+            torus.rotation.y += rotationSpeedY;
+
+            // Aplicar fricción para que se detenga suavemente si no se pulsa nada
+            rotationSpeedX *= FRICTION;
+            rotationSpeedY *= FRICTION;
+
+            // Rotación base sutil para que nunca esté completamente estático (mundo vivo)
+            torus.rotation.z += 0.002;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+    </script>
+</body>
+</html>

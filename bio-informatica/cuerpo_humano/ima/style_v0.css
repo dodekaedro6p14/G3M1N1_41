@@ -1,0 +1,145 @@
+:root {
+    --primary: #2c3e50;
+    --secondary: #818cf8;
+    --accent: #e74c3c;
+    --bg-color: #0f172a;
+    --white: #ffffff;
+    --black: #1e293b;
+    --color-fuente: #fff;
+    --color_fondo: #000;
+    --card-bg: #161b22;
+    --text-color: #c9d1d9;
+    --accent-color: #58a6ff;
+    --energy-color: #f9e231;
+    --border-color: #30363d;
+    --footer-color: #8b949e;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden; /* Evita barras de desplazamiento en toda la página */
+}
+
+.app-container {
+    display: flex;
+    height: 100%;
+    width: 100vw;
+}
+
+/* --- PANEL LATERAL IZQUIERDO --- */
+.ui-panel {
+    width: 350px;
+    background-color: var(--card-bg);
+    border-right: 2px solid var(--border-color);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+    z-index: 10;
+}
+
+.ui-panel h1 {
+    color: var(--white);
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 10px;
+}
+
+.subtitle {
+    color: var(--secondary);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+.input-box {
+    background-color: var(--black);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 20px;
+}
+
+.input-box label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.input-box input {
+    width: 90%;
+    padding: 10px;
+    font-size: 1.2rem;
+    background-color: var(--bg-color);
+    color: var(--energy-color);
+    border: 1px solid var(--accent-color);
+    border-radius: 5px;
+    text-align: center;
+}
+
+.data-feedback {
+    flex-grow: 1;
+}
+
+.data-feedback ul {
+    list-style: none;
+    padding: 0;
+}
+
+.data-feedback li {
+    background-color: var(--black);
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border-left: 4px solid var(--accent-color);
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.instructions {
+    background-color: rgba(44, 62, 80, 0.5);
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--footer-color);
+}
+
+/* --- VISOR CENTRAL (IMÁGENES) --- */
+.graphic-display {
+    flex-grow: 1;
+    background-color: var(--color_fondo);
+    position: relative;
+    overflow: hidden; /* Corta lo que se salga al hacer zoom */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#zoom-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-origin: center center;
+    transition: transform 0.1s ease-out; /* Suaviza un poco el zoom */
+}
+
+.anatomy-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Mantiene proporciones */
+    pointer-events: none;
+    transition: filter 0.5s ease; /* Transición suave al cambiar de color */
+}
+
+/* Efectos de estado de texto */
+.status-normal { color: #2ecc71; font-weight: bold; }
+.status-warning { color: #f1c40f; font-weight: bold; }
+.status-danger { color: #e74c3c; font-weight: bold; }

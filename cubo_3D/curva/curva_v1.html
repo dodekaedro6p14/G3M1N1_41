@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Periodic Table - Curved View</title>
+    <style>
+        :root {
+            /* --- VARIABLES EDITABLES --- */
+            --hub-bottom: 30px;           /* Ubicación del panel de control */
+            --curvatura-intensidad: 8deg; /* Ángulo entre columnas (más grados = más curva) */
+            --distancia-vista: 800px;     /* Profundidad del radio */
+            
+            /* Paleta Neón Cuántica */
+            --neon-cyan: #00f2ff;
+            --neon-pink: #ff00e1;
+            --glass-bg: rgba(0, 20, 30, 0.7);
+        }
+
+        body {
+            margin: 0;
+            background: radial-gradient(circle at center, #0a0a1a 0%, #000 100%);
+            color: white;
+            font-family: 'Orbitron', 'Segoe UI', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            perspective: 1500px; /* Perspectiva global */
+        }
+
+        /* ESCENARIO 3D */
+        .stage {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform-style: preserve-3d;
+        }
+
+        /* CARRUSEL (Contenedor de la Tabla Curva) */
+        .carrusel {
+            display: flex;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.1, 0.8, 0.2, 1);
+            will-change: transform;
+            position: relative;
+        }
+
+        /* COLUMNAS DE LA TABLA */
+        .columna-cuantica {
+            position: absolute;
+            width: 120px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transform-style: preserve-3d;
+        }
+
+        /* ELEMENTOS (CELDAS) */
+        .elemento {
+            width: 110px;
+            height: 110px;
+            background: var(--glass-bg);
+            border: 1px solid var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        .elemento:hover {
+            background: var(--neon-cyan);
+            color: black;
+            box-shadow: 0 0 30px var(--neon-cyan);
+            transform: translateZ(20px);
+        }
+
+        .simbolo { font-size: 2rem; font-weight: bold; }
+        .numero { font-size: 0.7rem; align-self: flex-start; padding-left: 5px; }
+
+        /* HUD - PANEL DE CONTROL (UBICACIÓN EDITABLE) */
+        .hub {
+            position: absolute;
+            bottom: var(--hub-bottom); /* Controlado por variable arriba */
+            width: 80%;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid var(--neon-pink);
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 -10px 30px rgba(255, 0, 225, 0.2);
+        }
+
+        .controles span {
+            color: var(--neon-cyan);
+            border: 1px solid var(--neon-cyan);
+            padding: 5px 10px;
+            margin: 0 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+        }
+
+        /* Decoración de fondo */
+        .filamentos-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+            opacity: 0.2;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="filamentos-bg"></div>
+
+    <div class="stage">
+        <div class="carrusel" id="quantum-table">
+            </div>
+    </div>
+
+    <div class="hub">
+        <div style="color: var(--neon-pink);"><b>QUBIT_TABLE V1.0</b></div>
+        <div class="controles">
+            <span>A / D</span> Navegar Energía
+            <span>Q / E</span> Zoom Cuántico
+            <span>R</span> Resetear Matriz
+        </div>
+        <div id="info-status" style="font-size: 10px; color: #666;">ESTADO: ESTABLE</div>
+    </div>
+
+    <script>
+        const tableContainer = document.getElementById('quantum-table');
+        
+        // --- DATA DE EJEMPLO (MANUAL COMO PEDISTE) ---
+        // Organizamos por columnas para crear el efecto curvo
+        const periodicData = [
+            { col: 1, elements: [{n:1, s:'H', name:'Hidrógeno'}, {n:3, s:'Li', name:'Litio'}] },
+            { col: 2, elements: [{n:4, s:'Be', name:'Berilio'}, {n:12, s:'Mg', name:'Magnesio'}] },
+            { col: 3, elements: [{n:21, s:'Sc', name:'Escandio'}, {n:39, s:'Y', name:'Itrio'}] },
+            { col: 4, elements: [{n:22, s:'Ti', name:'Titanio'}, {n:40, s:'Zr', name:'Circonio'}] },
+            { col: 5, elements: [{n:23, s:'V', name:'Vanadio'}, {n:41, s:'Nb', name:'Niobio'}] },
+            { col: 6, elements: [{n:74, s:'W', name:'Wolframio'}, {n:106, s:'Sg', name:'Seaborgio'}] },
+            { col: 7, elements: [{n:2, s:'He', name:'Helio'}, {n:10, s:'Ne', name:'Neón'}] }
+        ];
+
+        // Configuración de movimiento
+        let currentRot = 0;
+        let currentZoom = -400;
+        const totalCols = periodicData.length;
+        const arcDegrees = 8; // Grados entre columnas
+        
+        // Límites para que no dé la vuelta completa
+        const maxRot = (totalCols * arcDegrees) / 2;
+        const minRot = -maxRot;
+
+        function buildCurvedTable() {
+            periodicData.forEach((column, index) => {
+                const colDiv = document.createElement('div');
+                colDiv.className = 'columna-cuantica';
+                
+                // Cálculo de ángulo para efecto curvo
+                const angle = (index - (totalCols/2)) * arcDegrees;
+                colDiv.style.transform = `rotateY(${angle}deg) translateZ(600px)`;
+
+                column.elements.forEach(el => {
+                    const elDiv = document.createElement('div');
+                    elDiv.className = 'elemento';
+                    elDiv.innerHTML = `
+                        <div class="numero">${el.n}</div>
+                        <div class="simbolo">${el.s}</div>
+                        <div style="font-size:8px">${el.name}</div>
+                    `;
+                    colDiv.appendChild(elDiv);
+                });
+                tableContainer.appendChild(colDiv);
+            });
+        }
+
+        function updateFrame() {
+            // Aplicamos rotación y zoom con suavidad
+            tableContainer.style.transform = `translateZ(${currentZoom}px) rotateY(${currentRot}deg)`;
+        }
+
+        // MOTOR DE TECLADO
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            const step = 4;
+            const zoomStep = 40;
+
+            if (key === 'a' && currentRot < maxRot) currentRot += step;
+            if (key === 'd' && currentRot > minRot) currentRot -= step;
+            if (key === 'q') currentZoom += zoomStep;
+            if (key === 'e') currentZoom -= zoomStep;
+            if (key === 'r') { currentRot = 0; currentZoom = -400; }
+
+            updateFrame();
+        });
+
+        // Inicialización
+        buildCurvedTable();
+        updateFrame();
+    </script>
+</body>
+</html>

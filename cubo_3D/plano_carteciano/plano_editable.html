@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>PL4N0_C4R73Z14N0</title>
+    <link rel="stylesheet" href="styles_geo.css">
+</head>
+
+<body>
+
+    <div id="background-guide"></div>
+
+    <div id="panel-info">
+        <h2 style="margin:0; text-shadow: 0 0 5px #00fbff;">EDITOR_pl4N0</h2>
+        <p style="font-size: 11px; color: cyan; margin-bottom: 5px;">
+            EJES: <span style="color:#ff4d4d">X(A-D)</span> |
+            <span style="color:#4dff4d">Y(W-S)</span> |
+            <span style="color:#4d4dff">Z(Q-E zoom)</span><br>
+            <span style="color: #ff4dd2">P(Rotation)</span>
+            R: Resetear Multiverso
+        </p>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let angleX = 0, angleY = 0, zoom = 1.0;
+
+        // Generador de paleta surrealista aleatoria para el plano (5,6,7,8)
+        function generarColorSurrealista() {
+            const matices = ['#ff006e', '#8338ec', '#3a86ff', '#00fbff', '#ffbe0b'];
+            return matices[Math.floor(Math.random() * matices.length)];
+        }
+        // Asignamos el color aleatorio al cargar el universo
+        const colorPlanoSuperior = "#ff4da6";
+
+        // Función para mezclar color Hex y Opacidad
+        function hexToRgba(hex, alpha) {
+            let r = parseInt(hex.slice(1, 3), 16),
+                g = parseInt(hex.slice(3, 5), 16),
+                b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        const puntos = [
+            [0, 0, 0],      // 0: Centro
+            [50, -50, 50],    // 1: cubo
+            [-50, -50, 50],   // 2:
+            [-50, -50, -50],  // 3:
+            [50, -50, -50],   // 4: puntos inferiores
+            [50, 50, 50],   // 5: puntos superiores
+            [50, 50, -50],   // 6:
+            [-50, 50, -50],   // 7:
+            [-50, 50, 50],   // 8:
+
+            [0, -100, 0],   // 9: Mentón
+            [-120, -25, 0], // 10: Pómulo Izq
+            [120, -25, 0],  // 11: Pómulo Der
+            [0, -25, -120], // 12: Punta Nariz
+            [0, -25, 120],  // 13: Ojo Izq
+
+            [-0, -35, -0],  // 14: centro tetraedro
+            [-17.68, 15, 30.62], // 15: Comisura boca Izq
+            [35.36, 15, 0],      // 16: Comisura boca Der
+            [-17.68, 15, -30.62],   // 17: Labio superior
+
+            [0, -120, 0]     // 18: EL NUEVO NÚCLEO (Esfera Editable)
+        ];
+
+        const conexiones = [
+            [1, 2], [2, 3], [3, 4], [4, 1], // cubo base
+            [5, 6], [6, 4], [5, 1], [8, 5], [8, 2], [7, 3], [7, 8], [7, 6],
+            [14, 15], [15, 16], [16, 17], [17, 14], [14, 16], [15, 17] // tetraedro
+        ];
+
+        // ==========================================
+        // RUTA DE CONEXIONES CURVAS (ZONA EDITABLE)
+        // ==========================================
+        // Ingresa los pares de puntos que quieres unir. 
+        // Formato: [PuntoA, PuntoB]
+        const conexiones_curvas = [
+            [9, 4], [9, 3], [9, 1], [9, 2],
+            [4, 12], [4, 11], [1, 11], [1, 13],
+            [12, 3],  // Ejemplo: unir el 5 con el 8
+            [3, 10],
+            [10, 2], [2, 13]
+            // Puedes agregar [A, B], [B, C] infinitamente...
+        ];
+
+        // Esta función sabe CÓMO dibujar una curva entre dos puntos cualquiera
+        function dibujarCurvaAutomatica(indiceA, indiceB, color = "#ff0000", altura = 15) {
+            let pA = puntos[indiceA];
+            let pB = puntos[indiceB];
+            if (!pA || !pB) return;
+
+            ctx.beginPath();
+            ctx.strokeStyle = color; //defcto
+            ctx.lineWidth = 2;
+
+            const segmentos = 20;
+            // 1. Calculamos el punto medio entre A y B en el espacio 3D
+            let medioX = (pA[0] + pB[0]) / 2;
+            let medioY = (pA[1] + pB[1]) / 2;
+            let medioZ = (pA[2] + pB[2]) / 2;
+
+            // 2. Vector de "Dirección hacia Afuera" 
+            // Si el centro de tu objeto es [0,0,0], este vector apunta hacia afuera
+            let mag = Math.sqrt(medioX ** 2 + medioY ** 2 + medioZ ** 2);
+            let dirX = medioX / mag;
+            let dirY = medioY / mag;
+            let dirZ = medioZ / mag;
+
+            for (let i = 0; i <= segmentos; i++) {
+                let t = i / segmentos;
+
+                // Interpolación lineal base
+                let x = pA[0] + (pB[0] - pA[0]) * t;
+                let y = pA[1] + (pB[1] - pA[1]) * t;
+                let z = pA[2] + (pB[2] - pA[2]) * t;
+
+                // 3. Aplicamos la "Curvatura hacia Afuera"
+                // En lugar de restar solo en Y, sumamos en la dirección del vector exterior
+                let arco = Math.sin(t * Math.PI) * altura;
+
+                let puntoCurvo = proyectar([
+                    x + (dirX * arco),
+                    y + (dirY * arco),
+                    z + (dirZ * arco)
+                ]);
+
+                if (i === 0) ctx.moveTo(puntoCurvo.x, puntoCurvo.y);
+                else ctx.lineTo(puntoCurvo.x, puntoCurvo.y);
+            }
+
+            ctx.stroke();
+        }
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function proyectar(p) {
+            let x = p[0], y = p[1], z = p[2];
+
+            // Rotación Y
+            let cY = Math.cos(angleY), sY = Math.sin(angleY);
+            let x1 = x * cY + z * sY;
+            let z1 = -x * sY + z * cY;
+
+            // Rotación X
+            let cX = Math.cos(angleX), sX = Math.sin(angleX);
+            let y2 = y * cX - z1 * sX;
+            let z2 = y * sX + z1 * cX;
+
+            // Perspectiva dinámica (el secreto del 3D)
+            let pers = 800 / (800 - z2); // defecto 800
+            return {
+                x: (x1 * pers * zoom) + width / 2,
+                y: (-y2 * pers * zoom) + height / 2,
+                z: z2,
+                escalaPerspectiva: pers * zoom // Retornamos esto para escalar la esfera y grosores
+            };
+        }
+
+        function dibujarEjes() {
+            const largo = 0;  // largo de los ejes de colores
+            const origen = proyectar([0, 0, 0]);
+            const ejeX = proyectar([largo, 0, 0]);
+            const ejeY = proyectar([0, largo, 0]);
+            const ejeZ = proyectar([0, 0, largo]);
+
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.strokeStyle = "rgba(255,0,0,0.5)";
+            ctx.moveTo(origen.x, origen.y); ctx.lineTo(ejeX.x, ejeX.y); ctx.stroke();
+            ctx.beginPath(); ctx.strokeStyle = "rgba(0,255,0,0.5)";
+            ctx.moveTo(origen.x, origen.y); ctx.lineTo(ejeY.x, ejeY.y); ctx.stroke();
+            ctx.beginPath(); ctx.strokeStyle = "rgba(0,0,255,0.5)";
+            ctx.moveTo(origen.x, origen.y); ctx.lineTo(ejeZ.x, ejeZ.y); ctx.stroke();
+        }
+
+        function loop() {
+            // Si la animación está activa, sumamos velocidad al eje elegido
+            if (animacionActiva) {
+                let mostrarIndices = true; // por defecto se ven los numeros
+
+                if (ejeGiro === 'X') angleX += velocidadGiro;
+                if (ejeGiro === 'Y') angleY += velocidadGiro;
+                if (ejeGiro === 'Z') {
+                    // El giro en Z es especial, puedes aplicarlo rotando los puntos 
+                    // o simplemente sumando a angleY para un efecto similar
+                    angleY += velocidadGiro;
+                }
+            }
+            ctx.clearRect(0, 0, width, height);
+            dibujarEjes();
+
+            const pProyectados = puntos.map(p => proyectar(p));
+
+            // ==========================================
+            // DIBUJAR TODAS LAS CURVAS AUTOMÁTICAMENTE
+            // ==========================================
+            conexiones_curvas.forEach(par => {
+                // par[0] es el primer número, par[1] es el segundo
+                dibujarCurvaAutomatica(par[0], par[1], "#ff0000", 15); // defec 40
+            });
+
+            // ==========================================
+            // MAGIA 1: PLANO DE COLOR
+            // ==========================================
+            // Trazamos un polígono uniendo los puntos proyectados
+            // Un toque de transparencia
+            ctx.beginPath();
+            ctx.fillStyle = colorPlanoSuperior;
+            ctx.globalAlpha = 0.5;
+            ctx.moveTo(pProyectados[5].x, pProyectados[5].y);
+            ctx.lineTo(pProyectados[6].x, pProyectados[6].y);
+            ctx.lineTo(pProyectados[7].x, pProyectados[7].y);
+            ctx.lineTo(pProyectados[8].x, pProyectados[8].y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.globalAlpha = 1.0;
+
+            // ==========================================
+            // MALLA PRINCIPAL (Líneas Originales)
+            // ==========================================
+            ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
+            conexiones.forEach(c => {
+                if (pProyectados[c[0]] && pProyectados[c[1]]) {
+                    const p1 = pProyectados[c[0]];
+                    const p2 = pProyectados[c[1]];
+                    ctx.beginPath();
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.stroke();
+                }
+            });
+
+            // ==========================================
+            // MAGIA 3: SISTEMA DE ESFERAS MODULAR
+            // ==========================================
+
+            // 1. Creamos la "fábrica" de esferas (esta función la declaras una vez)
+            function dibujarEsfera(indicePunto, radio, color, opacidad) {
+                let p = pProyectados[indicePunto];
+                if (p) {
+                    let radioReal = radio * p.escalaPerspectiva;
+                    ctx.fillStyle = color;
+                    ctx.globalAlpha = opacidad;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, Math.abs(radioReal), 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1.0; // Reset
+                }
+            }
+
+            // 2. ¡Llamamos a la función las veces que queramos!
+            // --- ZONA EDITABLE DE ESFERAS ---
+
+            // Esfera en el punto 18 (Núcleo)
+            //dibujarEsfera(18, 40, "#00fbff", 0.8);
+
+            // Esfera en el punto 0 (Centro original)
+            dibujarEsfera(0, 15, "#ff006e", 0.7);
+
+            // Puedes agregar otra en el mentón (Punto 9)
+            dibujarEsfera(0, 80, "#ff0000", 0.2);
+
+            // Dibujar Puntos e Índices
+            pProyectados.forEach((p, i) => {
+                
+                ctx.fillStyle = (i === 18) ? "#ffffff" : "#ff006e";
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, (i === 18) ? 2 : 1.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = "#fff";
+                ctx.font = "9px Courier New";
+                // Posicionar el texto un poco distinto para la esfera para que no se pise
+                if (i === 18) ctx.fillText(``, p.x + 12, p.y - 12);
+                else ctx.fillText(i, p.x + 8, p.y - 8);
+            });
+
+            requestAnimationFrame(loop);
+        }
+
+        // --- CONTROLES MOUSE/TECLADO FLUIDOS ---
+        // --- VARIABLES DE ANIMACIÓN AUTOMÁTICA ---
+        let animacionActiva = false;
+        let ejeGiro = 'Y'; // Puedes cambiarlo a 'X', 'Y' o 'Z'
+        let velocidadGiro = 0.01; // Ajusta este número para que sea más rápido o lento
+
+        let drag = false, lastX, lastY;
+        canvas.onmousedown = (e) => { drag = true; lastX = e.clientX; lastY = e.clientY; };
+        window.onmouseup = () => drag = false;
+        window.onmousemove = (e) => {
+            if (!drag) return;
+            angleY += (e.clientX - lastX) * 0.01;
+            angleX += (e.clientY - lastY) * 0.01;
+            lastX = e.clientX; lastY = e.clientY;
+        };
+        window.onkeydown = (e) => {
+            const key = e.key.toLowerCase();
+
+            //Interruptor de animación con la tecla P
+            if (key === 'q') zoom += 0.1;
+            if (key === 'e') zoom = Math.max(0.1, zoom - 0.1); // Evitar zoom negativo
+            if (key === 'a') angleY -= 0.1;
+            if (key === 'd') angleY += 0.1;
+            if (key === 'w') angleX += 0.1;
+            if (key === 's') angleX -= 0.1;
+            if (key === 'r') { angleX = 0; angleY = 0; zoom = 1; animacionActiva = false; }
+            if (key === 'p') {
+                animacionActiva = !animacionActiva; // Invierte el estado (true/false)
+                console.log("Animación automática:", animacionActiva ? "ON" : "OFF");
+            }
+            // Dentro de window.onkeydown = (e) => { ... }
+            if (key === 'v') {
+                mostrarIndices = !mostrarIndices; // Cambia de true a false y viceversa
+                console.log("Visibilidad de índices:", mostrarIndices ? "ON" : "OFF");
+            }
+            // Añade esto dentro de window.onkeydown
+            if (key === 'x') ejeGiro = 'X';
+            if (key === 'y') ejeGiro = 'Y';
+            if (key === 'z') ejeGiro = 'Z';
+        };
+
+        loop();
+    </script>
+</body>
+
+</html>

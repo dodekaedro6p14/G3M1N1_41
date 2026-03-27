@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bio-Ingeniería: Informe Celular</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+<header>
+    <h1>Análisis de Biología Molecular</h1>
+    <p>Construcción de la vida celular y modificación del ADN</p>
+</header>
+
+<div class="container">
+    <section>
+        <h2>1. Diferenciación Celular</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Humana / Animal</h3>
+                <p>Sin pared celular. Flexibilidad estructural. Colesterol en membrana. Alta especialización en tejidos complejos.</p>
+            </div>
+            <div class="card">
+                <h3>Vegetal / Fungi</h3>
+                <p>Paredes de celulosa (plantas) o quitina (hongos). Presencia de vacuolas y cloroplastos en el reino vegetal.</p>
+            </div>
+        </div>
+    </section>
+
+    <section style="margin-top: 40px;">
+        <h2>2. Componentes de la Célula Humana</h2>
+        <div class="card" style="opacity: 1; width: 100%;">
+            <p><strong>Núcleo:</strong> El repositorio del código fuente (ADN).</p>
+            <p><span class="mitochondria-tag">Mitocondria:</span> El motor energético; central de ATP.</p>
+            <p><strong>Ribosomas:</strong> Impresoras 3D de proteínas.</p>
+            <p><strong>Aparato de Golgi:</strong> Control de calidad y logística de exportación.</p>
+            
+            <a href="cell_v1.3.html" class="btn-link">Explorar Atlas Celular</a>
+        </div>
+    </section>
+
+    <section style="margin-top: 40px;">
+        <h2>3. Revolución Genética: CRISPR-Cas9</h2>
+        <div class="card">
+            <p>CRISPR es el software de edición que permite reescribir secuencias de nucleótidos con precisión quirúrgica. Utiliza el ARN guía para localizar el error y la enzima Cas9 para realizar la incisión.</p>
+            
+            <a href="informe_crispr.html" class="btn-link" style="background-color: var(--accent);">Protocolos CRISPR</a>
+        </div>
+    </section>
+</div>
+
+<footer>
+    <p>© 2024 Proyecto Biología Sintética - Generado por Nana</p>
+</footer>
+
+<script>
+    // Animación de entrada para las tarjetas
+    document.addEventListener('DOMContentLoaded', () => {
+        const cards = document.querySelectorAll('.card');
+        cards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transition = 'opacity 0.8s ease, transform 0.3s ease';
+            }, index * 200);
+        });
+    });
+</script>
+
+</body>
+</html>

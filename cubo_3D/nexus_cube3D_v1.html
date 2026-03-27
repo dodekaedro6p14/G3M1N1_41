@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cubo 3D Interactivo - Enlaces</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #1a1a1a;
+            font-family: 'Segoe UI', sans-serif;
+            color: white;
+            overflow: hidden; /* Evita barras de desplazamiento al hacer zoom */
+        }
+
+        /* Instrucciones en pantalla */
+        .instrucciones {
+            position: absolute;
+            top: 20px;
+            background: rgba(0, 255, 204, 0.1);
+            border: 1px solid #00ffcc;
+            padding: 15px 25px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
+            z-index: 10;
+        }
+
+        .instrucciones h2 { margin: 0 0 10px 0; font-size: 18px; color: #00ffcc;}
+        .instrucciones p { margin: 5px 0; font-size: 14px; }
+        .tecla { background: #333; padding: 2px 6px; border-radius: 4px; color: #00ffcc; font-weight: bold;}
+
+        /* Escena 3D */
+        .scene {
+            width: 300px;
+            height: 300px;
+            perspective: 1000px; /* Perspectiva más profunda para que el zoom se vea bien */
+            margin-top: 50px;
+        }
+
+        /* El Cubo */
+        .cube {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out; /* Movimiento suave al teclear */
+        }
+
+        /* Caras del cubo */
+        .face {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border: 2px solid #00ffcc;
+            background: rgba(0, 20, 15, 0.85); /* Fondo oscuro semitransparente */
+            
+            /* Sistema de cuadrícula para las 9 carpetas (3x3) */
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        /* Posicionamiento de las caras (Mitad de 300px = 150px) */
+        .front  { transform: rotateY(0deg) translateZ(150px); }
+        .right  { transform: rotateY(90deg) translateZ(150px); }
+        .back   { transform: rotateY(180deg) translateZ(150px); }
+        .left   { transform: rotateY(-90deg) translateZ(150px); }
+        .top    { transform: rotateX(90deg) translateZ(150px); }
+        .bottom { transform: rotateX(-90deg) translateZ(150px); }
+
+        /* Estilo de cada carpeta/enlace */
+        .enlace-carpeta {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 255, 204, 0.1);
+            border: 1px solid rgba(0, 255, 204, 0.5);
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .enlace-carpeta:hover {
+            background: rgba(0, 255, 204, 0.5);
+            transform: scale(1.05) translateZ(10px); /* Efecto pop-up al pasar el ratón */
+            box-shadow: 0 0 15px #00ffcc;
+            border-color: #00ffcc;
+        }
+
+        .icono {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="instrucciones">
+        <h2>Panel de Control</h2>
+        <p><span class="tecla">W</span> / <span class="tecla">Z</span> : Rotar Arriba/Abajo (Eje X)</p>
+        <p><span class="tecla">A</span> / <span class="tecla">D</span> : Rotar Izquierda/Derecha (Eje Y)</p>
+        <p><span class="tecla">Q</span> / <span class="tecla">E</span> : Zoom Acercar/Alejar</p>
+        <p><span class="tecla">R</span> : Restaurar vista por defecto</p>
+    </div>
+
+    <div class="scene">
+        <div class="cube" id="cube">
+            <div class="face front" id="cara-frente"></div>
+            <div class="face right" id="cara-derecha"></div>
+            <div class="face back" id="cara-atras"></div>
+            <div class="face left" id="cara-izquierda"></div>
+            <div class="face top" id="cara-arriba"></div>
+            <div class="face bottom" id="cara-abajo"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. GENERACIÓN DE LOS 54 ENLACES ---
+        // Para que tu HTML no sea larguísimo, he creado esta pequeña función 
+        // que inyecta las 9 carpetas en cada una de las 6 caras automáticamente.
+        
+        const caras = ['cara-frente', 'cara-derecha', 'cara-atras', 'cara-izquierda', 'cara-arriba', 'cara-abajo'];
+        
+        caras.forEach((idCara, indiceCara) => {
+            const contenedorCara = document.getElementById(idCara);
+            
+            // Creamos 9 enlaces por cara
+            for (let i = 1; i <= 9; i++) {
+                const numEnlace = (indiceCara * 9) + i; // Da un número del 1 al 54
+                
+                // Aquí puedes variar los íconos (puedes cambiarlos luego a 🌍, 🔗, 📁, etc.)
+                let icono = "📁";
+                if(i % 2 === 0) icono = "🌐"; 
+                if(i % 3 === 0) icono = "🚀";
+
+                // Plantilla del enlace editable
+                const enlace = document.createElement('a');
+                enlace.href = "https://tu-enlace-aqui.com"; // <-- EDITA TU URL AQUÍ
+                enlace.target = "_blank"; // Abre en pestaña nueva
+                enlace.className = "enlace-carpeta";
+                enlace.innerHTML = `
+                    <span class="icono">${icono}</span>
+                    <span>Link ${numEnlace}</span>
+                `;
+                
+                contenedorCara.appendChild(enlace);
+            }
+        });
+
+        // --- 2. LÓGICA DE MOVIMIENTO CON EL TECLADO ---
+        
+        // Variables iniciales (Perspectiva por defecto)
+        const initAngleX = -15; 
+        const initAngleY = -25;
+        const initScale = 1;
+
+        let angleX = initAngleX;
+        let angleY = initAngleY;
+        let scale = initScale;
+        
+        const cube = document.getElementById('cube');
+        const step = 10; // Velocidad de rotación (grados por cada tecla presionada)
+
+        // Función que aplica los giros y el zoom al cubo
+        function updateTransform() {
+            cube.style.transform = `scale(${scale}) rotateX(${angleX}deg) rotateY(${angleY}deg)`;
+        }
+
+        // Posicionar el cubo al cargar la página
+        updateTransform();
+
+        // Escuchar el teclado
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase(); // Convertir a minúscula por si tienes CapsLock
+
+            switch(key) {
+                // Rotación Eje Y
+                case 'a': angleY -= step; break;
+                case 'd': angleY += step; break;
+                
+                // Rotación Eje X
+                case 'w': angleX += step; break;
+                case 'z': angleX -= step; break;
+                
+                // Zoom
+                case 'q': scale += 0.1; break;
+                case 'e': scale -= 0.1; break;
+                
+                // Resetear
+                case 'r': 
+                    angleX = initAngleX; 
+                    angleY = initAngleY; 
+                    scale = initScale; 
+                    break;
+            }
+
+            // Limitar el zoom para que no se aleje al infinito ni traspase la pantalla
+            scale = Math.max(0.3, Math.min(scale, 2.5));
+
+            // Aplicar los cambios
+            updateTransform();
+        });
+    </script>
+</body>
+</html>          

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estructura de ADN Animada</title>
+    <style>
+        /* Estilos básicos para limpiar la interfaz */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #050505; /* Fondo oscuro para resaltar el ADN */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Contenedor del Canvas */
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Contenido superpuesto */
+        .content {
+            position: relative;
+            z-index: 2;
+            color: white;
+            text-align: center;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none; /* Permite interactuar con el fondo si fuera necesario */
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-shadow: 0 0 20px rgba(0, 150, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container">
+        <canvas id="dnaCanvas"></canvas>
+    </div>
+
+    <div class="content">
+        <h1>Visualización de ADN</h1>
+        <p>Generado dinámicamente con JavaScript y Canvas API</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('dnaCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let rotation = 0;
+
+        // Configuración de la hélice
+        const dnaConfig = {
+            nodes: 40,          // Cantidad de pares de bases
+            radius: 80,         // Ancho de la hélice
+            speed: 0.02,        // Velocidad de rotación
+            nodeRadius: 4,      // Tamaño de las "bolitas"
+            spacing: 25         // Espacio vertical entre bases
+        };
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        function draw() {
+            // Limpiar el canvas con un ligero rastro (trail effect)
+            ctx.fillStyle = 'rgba(5, 5, 5, 0.2)';
+            ctx.fillRect(0, 0, width, height);
+
+            const centerX = width / 2;
+            const centerY = height / 2 - (dnaConfig.nodes * dnaConfig.spacing) / 2;
+
+            for (let i = 0; i < dnaConfig.nodes; i++) {
+                // Cálculo de la oscilación mediante seno y coseno
+                const y = centerY + i * dnaConfig.spacing;
+                const angle = rotation + (i * 0.2);
+                
+                const x1 = centerX + Math.cos(angle) * dnaConfig.radius;
+                const x2 = centerX + Math.cos(angle + Math.PI) * dnaConfig.radius;
+
+                // Determinar profundidad para efectos visuales (z-index simulado)
+                const size1 = (Math.sin(angle) + 2) * dnaConfig.nodeRadius;
+                const size2 = (Math.sin(angle + Math.PI) + 2) * dnaConfig.nodeRadius;
+
+                // Dibujar la línea de unión (base nitrogenada)
+                ctx.beginPath();
+                ctx.moveTo(x1, y);
+                ctx.lineTo(x2, y);
+                ctx.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                // Dibujar Nodo 1 (Hebra A)
+                ctx.beginPath();
+                ctx.arc(x1, y, size1, 0, Math.PI * 2);
+                ctx.fillStyle = '#00d4ff'; // Cian
+                ctx.fill();
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#00d4ff';
+
+                // Dibujar Nodo 2 (Hebra B)
+                ctx.beginPath();
+                ctx.arc(x2, y, size2, 0, Math.PI * 2);
+                ctx.fillStyle = '#ff007f'; // Magenta
+                ctx.fill();
+                ctx.shadowColor = '#ff007f';
+            }
+
+            rotation += dnaConfig.speed;
+            requestAnimationFrame(draw);
+        }
+
+        draw();
+    </script>
+</body>
+</html>

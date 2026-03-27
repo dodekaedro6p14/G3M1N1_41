@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Nano-Engine: Local Alignment (Smith-Waterman)</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #818cf8;
+            --accent: #e74c3c;
+            --bg-color: #0f172a;
+            --text: #333;
+            --white: #ffffff;
+            --black: #1e293b;
+            --color-fuente: #fff;
+            --color_fondo: #000;
+            --card-bg: #161b22;
+            --text-color: #c9d1d9;
+            --accent-color: #58a6ff;
+            --energy-color: #f9e231;
+            --border-color: #30363d;
+            --footer-color: #8b949e;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+
+        h1 { color: var(--accent-color); border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        textarea {
+            background: var(--black);
+            color: var(--energy-color);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+        }
+
+        .params {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .param-item label { display: block; font-size: 0.8rem; color: var(--footer-color); }
+        .param-item input {
+            width: 100%;
+            background: var(--black);
+            color: white;
+            border: 1px solid var(--border-color);
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        button {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        button:hover { background: var(--accent); transform: scale(1.02); }
+
+        .output {
+            margin-top: 30px;
+            background: #000;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--accent-color);
+            overflow-x: auto;
+        }
+
+        pre {
+            font-family: 'Courier New', monospace;
+            line-height: 1.2;
+            color: var(--energy-color);
+        }
+
+        .match-line { color: var(--white); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🧬 Smith-Waterman Local Aligner</h1>
+    <p>Algoritmo de alineamiento para la identificación de motivos y sitios de edición génica.</p>
+
+    <div class="input-group">
+        <label>Secuencia A (Referencia/Genoma):</label>
+        <textarea id="seqA" placeholder="Ej: ATGCGATCGTAGCTAGCT">GATTACA</textarea>
+        
+        <label>Secuencia B (Target/Inserto):</label>
+        <textarea id="seqB" placeholder="Ej: GATCGTAGC">GCATGCU</textarea>
+    </div>
+
+    <div class="params">
+        <div class="param-item">
+            <label>Match Score:</label>
+            <input type="number" id="match" value="2">
+        </div>
+        <div class="param-item">
+            <label>Mismatch Penalty:</label>
+            <input type="number" id="mismatch" value="-1">
+        </div>
+        <div class="param-item">
+            <label>Gap Penalty:</label>
+            <input type="number" id="gap" value="-2">
+        </div>
+    </div>
+
+    <button onclick="runAlignment()">Ejecutar Alineamiento Local</button>
+
+    <div id="resultContainer" class="output" style="display: none;">
+        <h3>Resultado del Alineamiento:</h3>
+        <pre id="alignmentOutput"></pre>
+        <p id="scoreInfo" style="color: var(--accent-color); font-weight: bold;"></p>
+    </div>
+</div>
+
+<script>
+    function runAlignment() {
+        const s1 = document.getElementById('seqA').value.toUpperCase().trim();
+        const s2 = document.getElementById('seqB').value.toUpperCase().trim();
+        const MATCH = parseInt(document.getElementById('match').value);
+        const MISMATCH = parseInt(document.getElementById('mismatch').value);
+        const GAP = parseInt(document.getElementById('gap').value);
+
+        if (!s1 || !s2) return alert("Por favor ingresa ambas secuencias.");
+
+        const n = s1.length;
+        const m = s2.length;
+
+        // 1. Inicializar Matriz de Scoring con ceros
+        let matrix = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+        let maxScore = 0;
+        let maxI = 0;
+        let maxJ = 0;
+
+        // 2. Llenado de la matriz (Smith-Waterman no permite valores negativos)
+        for (let i = 1; i <= m; i++) {
+            for (let j = 1; j <= n; j++) {
+                let score = (s2[i-1] === s1[j-1]) ? MATCH : MISMATCH;
+                
+                matrix[i][j] = Math.max(
+                    0,                                  // Característica clave: reset a 0
+                    matrix[i-1][j-1] + score,           // Diagonal
+                    matrix[i-1][j] + GAP,               // Up
+                    matrix[i][j-1] + GAP                // Left
+                );
+
+                if (matrix[i][j] >= maxScore) {
+                    maxScore = matrix[i][j];
+                    maxI = i;
+                    maxJ = j;
+                }
+            }
+        }
+
+        // 3. Traceback (Retroceso desde la puntuación más alta hasta encontrar un 0)
+        let align1 = "";
+        let align2 = "";
+        let visual = "";
+        let i = maxI;
+        let j = maxJ;
+
+        while (i > 0 && j > 0 && matrix[i][j] > 0) {
+            let current = matrix[i][j];
+            let diag = matrix[i-1][j-1];
+            let up = matrix[i-1][j];
+            let left = matrix[i][j-1];
+            let score = (s2[i-1] === s1[j-1]) ? MATCH : MISMATCH;
+
+            if (current === diag + score) {
+                align1 = s1[j-1] + align1;
+                align2 = s2[i-1] + align2;
+                visual = (s1[j-1] === s2[i-1] ? "|" : ".") + visual;
+                i--; j--;
+            } else if (current === up + GAP) {
+                align1 = "-" + align1;
+                align2 = s2[i-1] + align2;
+                visual = " " + visual;
+                i--;
+            } else {
+                align1 = s1[j-1] + align1;
+                align2 = "-" + align2;
+                visual = " " + visual;
+                j--;
+            }
+        }
+
+        // Mostrar resultados
+        document.getElementById('resultContainer').style.display = 'block';
+        document.getElementById('alignmentOutput').innerHTML = 
+            `SEQ A: ${align1}\n       ${visual}\nSEQ B: ${align2}`;
+        document.getElementById('scoreInfo').innerText = `Puntuación Máxima de Homología Local: ${maxScore}`;
+    }
+</script>
+
+</body>
+</html>

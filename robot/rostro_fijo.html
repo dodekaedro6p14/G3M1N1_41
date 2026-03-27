@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Matriz Facial Correcta - Fruta OS</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #050508;
+            color: #00fbff;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            border-left: 3px solid #ff006e;
+            padding-left: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ui">
+        <h2 style="margin:0; color:#00fbff;">SISTEMA_RECONOCIMIENTO_V3</h2>
+        <p style="font-size: 12px;">
+            ARRASTRAR MOUSE: ROTAR EJE X/Y<br>
+            TECLAS W/Z: ROTAR X | A/D: ROTAR Y<br>
+            TECLAS Q/E: ZOOM | R: RESET
+        </p>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let angleX = 0.3;
+        let angleY = 0.5;
+        let zoom = 1.0;
+
+        // --- NUBE DE PUNTOS DINÁMICA ---
+        // Generamos una estructura más detallada [x, y, z]
+        const puntos = [
+            // Mandíbula y barbilla
+            [0, -180, 60], [-40, -170, 50], [40, -170, 50], [-80, -140, 30], [80, -140, 30], [-110, -80, 0], [110, -80, 0],
+            // Mejillas y contorno lateral
+            [-130, 0, -20], [130, 0, -20], [-120, 100, -10], [120, 100, -10],
+            // Frente
+            [0, 220, 20], [-60, 210, 10], [60, 210, 10], [-100, 180, 0], [100, 180, 0],
+            // Ojos (Detalle aumentado)
+            [-50, 80, 45], [-30, 90, 50], [-10, 80, 45], [-30, 70, 50], // Izq
+            [50, 80, 45], [30, 90, 50], [10, 80, 45], [30, 70, 50],    // Der
+            // Nariz
+            [0, 80, 60], [0, 40, 90], [-25, 10, 70], [25, 10, 70], [0, 10, 85],
+            // Boca (Puntos clave para animación futura)
+            [-45, -60, 45], [0, -50, 75], [45, -60, 45], // Labio sup
+            [-30, -85, 55], [0, -95, 75], [30, -85, 55]  // Labio inf
+        ];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        // --- LÓGICA DE PROYECCIÓN 3D ---
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Ordenar puntos por profundidad (Z) para que los de adelante tapen a los de atrás
+            const projected = puntos.map(p => {
+                let x = p[0];
+                let y = p[1];
+                let z = p[2];
+
+                // Rotación Eje Y (A/D)
+                let cosY = Math.cos(angleY);
+                let sinY = Math.sin(angleY);
+                let x1 = x * cosY + z * sinY;
+                let z1 = -x * sinY + z * cosY;
+
+                // Rotación Eje X (W/Z)
+                let cosX = Math.cos(angleX);
+                let sinX = Math.sin(angleX);
+                let y2 = y * cosX - z1 * sinX;
+                let z2 = y * sinX + z1 * cosX;
+
+                // Proyección Perspectiva
+                let perspectiva = 600 / (600 - z2);
+                let px = (x1 * perspectiva * zoom) + width / 2;
+                let py = (-y2 * perspectiva * zoom) + height / 2; // Invertido para que Y+ sea arriba
+
+                return { x: px, y: py, z: z2 };
+            });
+
+            // Dibujar Conexiones (Malla)
+            ctx.beginPath();
+            ctx.strokeStyle = "rgba(0, 251, 255, 0.1)";
+            ctx.lineWidth = 0.5;
+            for(let i=0; i<projected.length; i++) {
+                for(let j=i+1; j<projected.length; j++) {
+                    let dist = Math.hypot(projected[i].x - projected[j].x, projected[i].y - projected[j].y);
+                    if(dist < 70) {
+                        ctx.moveTo(projected[i].x, projected[i].y);
+                        ctx.lineTo(projected[j].x, projected[j].y);
+                    }
+                }
+            }
+            ctx.stroke();
+
+            // Dibujar Puntos
+            projected.forEach((p, i) => {
+                let size = (p.z + 100) / 50; 
+                if (size < 1) size = 1;
+
+                // Color dinámico según profundidad
+                let bright = Math.floor(((p.z + 150) / 300) * 255);
+                ctx.fillStyle = `rgb(0, ${bright}, ${bright})`;
+                
+                // Resaltar ojos y boca en magenta
+                if (i >= 16 && i <= 34) ctx.fillStyle = `rgb(${bright}, 0, 110)`;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            requestAnimationFrame(draw);
+        }
+
+        // --- CONTROLES INTERACTIVOS ---
+        let isDragging = false;
+        let lastX, lastY;
+
+        canvas.onmousedown = (e) => { isDragging = true; lastX = e.clientX; lastY = e.clientY; };
+        window.onmouseup = () => isDragging = false;
+        window.onmousemove = (e) => {
+            if (!isDragging) return;
+            angleY += (e.clientX - lastX) * 0.01;
+            angleX += (e.clientY - lastY) * 0.01;
+            lastX = e.clientX;
+            lastY = e.clientY;
+        };
+
+        window.onkeydown = (e) => {
+            const s = 0.1;
+            switch(e.key.toLowerCase()) {
+                case 'a': angleY -= s; break;
+                case 'd': angleY += s; break;
+                case 'w': angleX -= s; break;
+                case 'z': angleX += s; break;
+                case 'q': zoom += 0.1; break;
+                case 'e': zoom -= 0.1; break;
+                case 'r': angleX = 0.3; angleY = 0.5; zoom = 1.0; break;
+            }
+        };
+
+        draw();
+    </script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+       <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Cuántico - Fruta Design</title>
+    <style>
+        /* --- ESTILO OSCURO Y ATMÓSFERA --- */
+        :root {
+            --bg-dark: #020205;
+            --glow-blue: #00d2ff;
+            --accent-gold: #c5a059;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden; /* Evita scroll para mantener la inmersión */
+        }
+
+        /* Contenedor Principal 3D */
+        .world-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            perspective: 1200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 1. FONDO ESPIRAL (Capa más profunda) */
+        .background-spiral {
+            position: absolute;
+            width: 150vmax; /* Más grande para que al rotar no se vean bordes */
+            height: 150vmax;
+            background: url('fondo.png') no-repeat center center;
+            background-size: cover;
+            z-index: 1;
+            opacity: 0.6;
+            animation: rotateSpiral 60s linear infinite;
+        }
+
+        /* 2. EL PORTAL DE GUARDIANES (Marco intermedio) */
+        .portal-frame {
+            position: absolute;
+            width: 80%;
+            max-width: 1000px;
+            z-index: 10;
+            pointer-events: none; /* Permite interactuar con lo que hay detrás */
+            filter: drop-shadow(0 0 20px rgba(0,0,0,0.8));
+        }
+
+        /* 3. ESCALONES (Capa frontal con flotabilidad) */
+        .steps-container {
+            position: absolute;
+            bottom: 10%;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform-style: preserve-3d;
+        }
+
+        .step {
+            width: 300px;
+            margin-top: -50px; /* Superposición para efecto 3D */
+            transition: transform 0.3s ease;
+            filter: brightness(0.8);
+        }
+
+        /* --- TÍTULO EDITABLE --- */
+        .editable-title {
+            position: absolute;
+            top: 50px;
+            z-index: 100;
+            font-size: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 10px;
+            color: var(--accent-gold);
+            text-shadow: 0 0 15px rgba(197, 160, 89, 0.5);
+            outline: none;
+            cursor: text;
+            text-align: center;
+        }
+
+        /* --- ANIMACIONES --- */
+        @keyframes rotateSpiral {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotateX(20deg); }
+            50% { transform: translateY(-20px) rotateX(25deg); }
+        }
+
+        .floating-step {
+            animation: float 4s ease-in-out infinite;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="world-container">
+        <h1 class="editable-title" contenteditable="true">PORTAL DEL DRAGÓN</h1>
+
+        <div class="background-spiral"></div>
+
+        <img src="portal_v1.png" alt="Portal" class="portal-frame">
+
+        <div class="steps-container">
+            <img src="ladrillo_fila.png" class="step floating-step" style="animation-delay: 0s; width: 450px;">
+            <img src="ladrillo_fila.png" class="step floating-step" style="animation-delay: 0.5s; width: 350px;">
+            <img src="ladrillo_fila.png" class="step floating-step" style="animation-delay: 1s; width: 250px;">
+        </div>
+    </div>
+
+    <script>
+        // --- MOTOR DE ANIMACIÓN Y PARALAJE ---
+        document.addEventListener('mousemove', (e) => {
+            const x = (window.innerWidth / 2 - e.pageX) / 50;
+            const y = (window.innerHeight / 2 - e.pageY) / 50;
+            
+            // Efecto de movimiento sutil en los escalones según el mouse
+            const steps = document.querySelectorAll('.step');
+            steps.forEach((step, index) => {
+                const depth = (index + 1) * 5;
+                step.style.marginLeft = `${x * depth}px`;
+                step.style.marginTop = `${(y * depth) - 50}px`;
+            });
+
+            // Movimiento del fondo para dar profundidad
+            const spiral = document.querySelector('.background-spiral');
+            spiral.style.transform = `rotate(${window.scrollY * 0.1}deg) translate(${x}px, ${y}px)`;
+        });
+
+        // Mensaje de bienvenida de Fruta en consola
+        console.log("%c Fruta Art Engine: Sistema Cuántico Activado ", "color: #00d2ff; font-weight: bold; background: #000; padding: 5px;");
+    </script>
+</body>
+</html>     

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNA Interpreter - PyScript Edition</title>
+    
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #818cf8;
+            --accent: #e74c3c;
+            --bg-color: #0f172a;
+            --text-color: #c9d1d9;
+            --white: #ffffff;
+            --black: #1e293b;
+            --card-bg: #161b22;
+            --accent-color: #58a6ff;
+            --energy-color: #f9e231;
+            --border-color: #30363d;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            height: 100%; width: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+        }
+
+        #canvas-dna {
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 1;
+        }
+
+        /* Interfaz de entrada de datos */
+        .dna-interface {
+            position: relative;
+            z-index: 10;
+            margin: 40px;
+            padding: 25px;
+            background: rgba(22, 27, 34, 0.85);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            width: 350px;
+            backdrop-filter: blur(10px);
+        }
+
+        h2 { color: var(--accent-color); font-size: 1.2rem; margin-top: 0; }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            background: var(--bg-color);
+            border: 1px solid var(--secondary);
+            color: var(--energy-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+            text-transform: uppercase;
+        }
+
+        .stats {
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .py-status { color: var(--secondary); font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas-dna"></canvas>
+
+    <div class="dna-interface">
+        <h2>Secuenciador Python</h2>
+        <p style="font-size: 0.7rem;">Introduce secuencia (Ej: ATGCGC...)</p>
+        
+        <input type="text" id="dna-input" placeholder="Escribe secuencia..." py-keyup="process_dna()">
+
+        <div class="stats" id="dna-output">
+            Esperando secuencia...
+        </div>
+        <div class="py-status">Python Engine: Ready</div>
+    </div>
+
+    <py-script>
+        from js import document, window
+
+        def process_dna(*args, **kwargs):
+            # Obtenemos el valor del input
+            input_text = document.getElementById("dna-input").value.upper()
+            output = document.getElementById("dna-output")
+            
+            if not input_text:
+                output.innerHTML = "Introduce bases (A, T, C, G)"
+                return
+
+            # Contamos nucleótidos usando lógica pura de Python
+            a = input_text.count('A')
+            t = input_text.count('T')
+            c = input_text.count('C')
+            g = input_text.count('G')
+            total = len(input_text)
+
+            # Calculamos un "Color Genético" basado en la proporción
+            # Si hay mucha Citocina (C), tiramos a Azul/Violeta
+            # Si hay mucha Adenina (A), tiramos a Amarillo/Energía
+            r = min(255, (a * 50))
+            g_color = min(255, (g * 50))
+            b = min(255, (c * 50 + t * 30))
+            
+            new_color = f"rgb({r}, {g_color}, {b})"
+
+            # Pasamos el color calculado a la animación de JavaScript
+            window.updateDNAColor(new_color)
+
+            # Mostramos estadísticas en la web
+            output.innerHTML = f"""
+                <b>Análisis Genómico:</b><br>
+                Total Bases: {total}<br>
+                A: {a} | T: {t} | C: {c} | G: {g}<br>
+                <span style="color:{new_color}">Color Resultante: {new_color}</span>
+            """
+    </py-script>
+
+    <script>
+        const canvas = document.getElementById('canvas-dna');
+        const ctx = canvas.getContext('2d');
+        let currentDNAColor = '#58a6ff'; // Color inicial (accent-color)
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Función que Python llamará para actualizar el color
+        window.updateDNAColor = function(color) {
+            currentDNAColor = color;
+        };
+
+        class Nucleotide {
+            constructor(y, offset) {
+                this.y = y;
+                this.offset = offset;
+            }
+            draw(time) {
+                const centerX = canvas.width / 2;
+                // Ecuación de la hélice
+                const x = centerX + Math.sin(time + this.y * 0.01 + this.offset) * 100;
+                
+                ctx.beginPath();
+                ctx.arc(x, this.y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = currentDNAColor;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = currentDNAColor;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        const nodes = [];
+        for(let i = 0; i < canvas.height; i += 15) {
+            nodes.push(new Nucleotide(i, 0));      // Cadena A
+            nodes.push(new Nucleotide(i, Math.PI)); // Cadena B (desfasada 180°)
+        }
+
+        let time = 0;
+        function animate() {
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.1)'; // Estilo Dark Lab con rastro
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            nodes.forEach(n => n.draw(time));
+            
+            time += 0.05;
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>

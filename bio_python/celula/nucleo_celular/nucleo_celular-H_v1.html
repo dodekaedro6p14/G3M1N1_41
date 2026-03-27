@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Núcleo Celular: Arquitectura Genómica</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #818cf8;
+            --accent: #e74c3c;
+            --bg-color: #0f172a;
+            --text: #333;
+            --white: #ffffff;
+            --black: #1e293b;
+            --color-fuente: #fff;
+            --color_fondo: #000;
+            --card-bg: #161b22;
+            --text-color: #c9d1d9;
+            --accent-color: #58a6ff;
+            --energy-color: #f9e231;
+            --border-color: #30363d;
+            --footer-color: #8b949e;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .header-nucleus {
+            background: linear-gradient(135deg, var(--black), var(--primary));
+            padding: 3rem 1rem;
+            text-align: center;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .content {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .info-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            transform: scale(0.95);
+            opacity: 0;
+            transition: all 0.6s ease-out;
+        }
+
+        .info-card.visible {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        h2 { color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
+        
+        .tech-detail {
+            background: rgba(129, 140, 248, 0.1);
+            border-left: 4px solid var(--secondary);
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 0.8rem 1.5rem;
+            background-color: var(--accent);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .btn-back:hover { background-color: #c0392b; }
+
+        footer { text-align: center; padding: 2rem; color: var(--footer-color); }
+    </style>
+</head>
+<body>
+
+<header class="header-nucleus">
+    <h1>El Núcleo Celular</h1>
+    <p>Unidad de Almacenamiento y Procesamiento Lógico del ADN</p>
+</header>
+
+<div class="content">
+    <div class="info-card" id="c1">
+        <h2>1. La Envoltura: Seguridad Perimetral</h2>
+        <p>A diferencia de otros orgánulos, el núcleo posee una <strong>doble membrana</strong>. La externa es continua con el retículo endoplásmico, mientras que la interna está reforzada por la lámina nuclear, una red proteica que da soporte mecánico y organiza los cromosomas.</p>
+        <div class="tech-detail">
+            Concepto avanzado: El núcleo actúa como un sensor mecánico que puede activar genes específicos bajo presión física.
+        </div>
+    </div>
+
+    <div class="info-card" id="c2">
+        <h2>2. Poros Nucleares: Control de Tráfico</h2>
+        <p>El Complejo del Poro Nuclear (NPC) es una de las estructuras más grandes de la célula. Regula el paso de macromoléculas mediante proteínas llamadas nucleoporinas.</p>
+        <ul>
+            <li>Importinas: Introducen proteínas con señales de localización nuclear (NLS).</li>
+            <li>Exportinas: Sacan el ARNm maduro para su traducción.</li>
+        </ul>
+    </div>
+
+    <div class="info-card" id="c3">
+        <h2>3. El Nucleolo: El Reactor</h2>
+        <p>No es una estructura física rígida, sino una región de alta actividad metabólica donde se sintetizan los ribosomas. Es el ejemplo perfecto de "auto-ensamblaje molecular".</p>
+    </div>
+    <div ><img src="../ima/nucleolo_celula_humana.png" width="400" style="float: right; margin: 10px;" alt="elementos">
+        </div>
+
+
+    <center>
+        <a href="../cell_v1.3.html" class="btn-back">Volver</a>
+    </center>
+</div>
+
+<footer>
+    <p>© 2024 Bio-Ingeniería Molecular | Protocolo N-01</p>
+</footer>
+
+<script>
+    window.addEventListener('scroll', () => {
+        const cards = document.querySelectorAll('.info-card');
+        cards.forEach(card => {
+            const cardTop = card.getBoundingClientRect().top;
+            if(cardTop < window.innerHeight - 100) {
+                card.classList.add('visible');
+            }
+        });
+    });
+    // Activación inicial
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelector('.info-card').classList.add('visible');
+    });
+</script>
+
+</body>
+</html>

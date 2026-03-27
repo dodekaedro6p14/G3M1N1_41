@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio de Metamorfosis Molecular</title>
+    <style>
+        /* ESTILOS ESTÁNDAR DEFINIDOS */
+        :root {
+            --primary: #2c3e50;
+            --secondary: #818cf8;
+            --accent: #e74c3c;
+            --bg-color: #0f172a;
+            --text: #333;
+            --white: #ffffff;
+            --black: #1e293b;
+            --color-fuente: #fff;
+            --color_fondo: #000;
+            --card-bg: #161b22;
+            --text-color: #c9d1d9;
+            --accent-color: #58a6ff;
+            --energy-color: #f9e231;
+            --border-color: #30363d;
+            --footer-color: #8b949e;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #canvas-metamorphosis {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* Capa de contenido editable */
+        .overlay {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: var(--color-fuente);
+            pointer-events: none; /* Permite que el mouse pase al canvas */
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: var(--accent-color);
+            text-shadow: 0 0 20px rgba(88, 166, 255, 0.5);
+            margin-bottom: 10px;
+        }
+
+        p {
+            max-width: 600px;
+            color: var(--text-color);
+            background: rgba(15, 23, 42, 0.6);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas-metamorphosis"></canvas>
+
+    <div class="overlay">
+        <h1>SISTEMA DINÁMICO</h1>
+        <p>
+            Las estructuras que ves se atraen y repelen siguiendo leyes de proximidad. 
+            Cada 10 segundos, el sistema intenta alcanzar un estado de orden geométrico 
+            antes de desintegrarse nuevamente.
+        </p>
+    </div>
+
+    <script>
+        /**
+         * LÓGICA DE ANIMACIÓN - PRIMA EXPERTA
+         */
+        const canvas = document.getElementById('canvas-metamorphosis');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let tick = 0;
+        let formationMode = false; // Alterna entre Caos Molecular y Orden Geométrico
+
+        // Configuración editable
+        const config = {
+            particleCount: 120,
+            connectionDist: 150, // Distancia para formar "enlaces"
+            morphSpeed: 0.05,
+            particleSize: 2
+        };
+
+        function init() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = [];
+            for (let i = 0; i < config.particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 1.5;
+                this.vy = (Math.random() - 0.5) * 1.5;
+                this.targetX = null;
+                this.targetY = null;
+                this.color = Math.random() > 0.5 ? 'var(--accent-color)' : 'var(--secondary)';
+            }
+
+            update() {
+                // Si estamos en modo formación, se mueven hacia un objetivo
+                if (formationMode && this.targetX !== null) {
+                    this.x += (this.targetX - this.x) * config.morphSpeed;
+                    this.y += (this.targetY - this.y) * config.morphSpeed;
+                } else {
+                    // Modo movimiento libre (Molecular)
+                    this.x += this.vx;
+                    this.y += this.vy;
+
+                    // Rebote en bordes
+                    if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                    if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, config.particleSize, 0, Math.PI * 2);
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(this.color === 'var(--accent-color)' ? '--accent-color' : '--secondary');
+                ctx.fill();
+            }
+        }
+
+        // Función para crear una forma geométrica (ej: un gran hexágono central)
+        function createShape(sides) {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 250;
+
+            for (let i = 0; i < particles.length; i++) {
+                // Distribuimos las partículas a lo largo de los perímetros de la forma
+                const angle = (i / particles.length) * Math.PI * 2;
+                // Lógica de forma: esto crea un polígono de 'sides' lados
+                const r = radius * Math.cos(Math.PI / sides) / Math.cos((angle % (Math.PI * 2 / sides)) - Math.PI / sides);
+                
+                particles[i].targetX = centerX + Math.cos(angle) * r;
+                particles[i].targetY = centerY + Math.sin(angle) * r;
+            }
+        }
+
+        function drawConnections() {
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < config.connectionDist) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(129, 140, 248, ${1 - dist / config.connectionDist})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            drawConnections();
+
+            tick++;
+            // Cada 600 frames (aprox 10 seg) cambiamos el modo
+            if (tick % 600 === 0) {
+                formationMode = !formationMode;
+                if (formationMode) {
+                    const sides = Math.floor(Math.random() * 4) + 3; // Triángulo a Hexágono
+                    createShape(sides);
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', init);
+        
+        init();
+        animate();
+
+    </script>
+</body>
+</html>

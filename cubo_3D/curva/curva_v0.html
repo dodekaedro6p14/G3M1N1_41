@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pantalla Curva Cuántica V2</title>
+    <style>
+        :root {
+            --neon-cyan: #00f2ff;
+            --neon-pink: #ff00e1;
+            --bg-dark: #020205;
+            /* EDITABLE: Ajusta este ángulo para cerrar o abrir la curva de cada segmento */
+            --curvatura: 5deg;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            perspective: 2000px;
+            /* Profundidad para el efecto 3D */
+        }
+
+        /* HUD - Panel de Control Superior */
+        .hud {
+            margin-top: 20px;
+            position: absolute;
+            bottom: var(--hub-bottom);
+            /* Controlado por variable arriba */
+            width: 80%;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid var(--neon-pink);
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 -10px 30px rgba(255, 0, 225, 0.2);
+
+            /*    width: 90%;
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid var(--neon-cyan);
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+            z-index: 100;
+            display: flex;
+            justify-content: space-around;
+            align-items: center; */
+        }
+
+        .tecla {
+            color: var(--neon-cyan);
+            font-weight: bold;
+            border: 1px solid var(--neon-cyan);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 0 5px;
+        }
+
+        /* Escenario y Contenedor Principal (Pegado al HUD) */
+        .stage {
+            margin-top: 350px;
+            width: 100%;
+            height: 70vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            /* Alinea hacia arriba */
+            padding-top: 10px;
+            /* Espacio mínimo con el HUD */
+            transform-style: preserve-3d;
+        }
+
+        /* La Pantalla Única Curva */
+        .carrusel {
+            display: flex;
+            transform-style: preserve-3d;
+            transition: transform 0.4s ease-out;
+            will-change: transform;
+        }
+
+        /* Segmentos de la tabla para crear la curva */
+        .columna-tabla {
+            position: absolute;
+            width: 150px;
+            /* Ancho de cada "tira" de la tabla */
+            height: 500px;
+            background: linear-gradient(180deg, rgba(0, 242, 255, 0.1) 0%, rgba(5, 5, 5, 0.9) 100%);
+            border-top: 2px solid var(--neon-cyan);
+            border-bottom: 2px solid var(--neon-pink);
+            border-left: 1px solid rgba(0, 242, 255, 0.2);
+            box-sizing: border-box;
+            padding: 15px;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        /* Estilo del contenido dentro de la tabla */
+        .contenido-celda {
+            font-size: 11px;
+            color: #adefff;
+            line-height: 1.4;
+            text-shadow: 0 0 2px rgba(0, 242, 255, 0.5);
+        }
+
+        .titulo-celda {
+            color: var(--neon-pink);
+            font-weight: bold;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 0, 225, 0.3);
+            font-size: 14px;
+        }
+
+        /* Fondo de filamentos (Representación de partículas) */
+        .filamentos {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 50% 50%, #101525 0%, #000 80%);
+            /*    url('https://www.transparenttextures.com/patterns/carbon-fibre.png');*/
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        .columna img {
+            max-height: 150px;
+            object-fit: cover;
+            /* Esto hace que la imagen no se deforme */
+            display: block;
+        }
+    </style>
+    <script src="datos.js"></script>
+</head>
+
+<body>
+
+    <div class="filamentos"></div>
+
+    <div class="hud">
+        <div style="text-align: left;">
+            <strong style="color: var(--neon-cyan);">NEXUS CURVE V2</strong><br>
+            <span style="font-size: 10px;">PROCESADOR DE DATOS CUÁNTICOS</span>
+        </div>
+        <div>
+            <span class="tecla">A</span> <span class="tecla">D</span> Mov3 StructuR4
+            <span class="tecla">Q</span> <span class="tecla">E</span> Zoom
+            <span class="tecla">R</span> Reset
+        </div>
+    </div>
+
+    <div class="stage">
+        <div class="carrusel" id="curved-screen">
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('curved-screen');
+
+        // --- CONFIGURACIÓN DE GEOMETRÍA ---
+        const radioCurva = 600;    // Aumenta este número para alejar los nodos (ej. 1500)
+        const separacionGrados = 15; // Ajusta cuántos grados hay entre cada nodo
+
+        let rotationY = 0;
+        let zoomZ = -200; // Zoom inicial para ver los 12 nodos bien (500)
+
+        function buildScreen() {
+            container.innerHTML = '';
+            datosNodos.forEach((nodo, index) => {
+                const col = document.createElement('div');
+                col.className = 'columna';
+
+                // Calculamos la posición en el arco basada en las variables de arriba
+                const angle = index * separacionGrados;
+                col.style.transform = `rotateY(${angle}deg) translateZ(${radioCurva}px)`;
+
+                const imagenHTML = nodo.imagen ? `<img src="${nodo.imagen}" style="width:100%; border-radius:5px; margin-bottom:10px;">` : '';
+
+                col.innerHTML = `
+                <div class="header"> [ ${nodo.id} ] ${nodo.titulo} </div>
+                <div class="content">
+                    ${imagenHTML}
+                    <p>${nodo.texto}</p>
+                </div>
+            `;
+                container.appendChild(col);
+            });
+        }
+
+        // --- MOTOR DE AUTO-CENTRADO ---
+        function updateTransform() {
+            // Esta fórmula hace que el giro sea relativo al centro de la pantalla
+            container.style.transform = `translateZ(${zoomZ}px) rotateY(${rotationY}deg)`;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+
+            // Al rotar con A y D, el "frente" cambia
+            // Para que un nodo quede exactamente al frente, rotationY debe ser el negativo de su ángulo
+            if (key === 'a') rotationY += separacionGrados;
+            if (key === 'd') rotationY -= separacionGrados;
+
+            if (key === 'q') zoomZ += 100;
+            if (key === 'e') zoomZ -= 100;
+            if (key === 'r') { rotationY = 0; zoomZ = -500; }
+
+            updateTransform();
+        });
+
+        buildScreen();
+        updateTransform();
+    </script>
+</body>
+
+</html>

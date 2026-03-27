@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaucho Cuántico: Escultura 3D Interactiva</title>
+    
+    <style>
+        body {
+            margin: 0;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #000000 100%);
+            color: #00fbff; /* Cian Cuántico */
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .controls-panel {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            background: rgba(10, 10, 35, 0.8);
+            padding: 20px;
+            border-left: 4px solid #ff006e; /* Magenta Profundo */
+            border-radius: 8px;
+            pointer-events: none;
+            line-height: 1.6;
+            z-index: 10;
+        }
+
+        .header {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            z-index: 10;
+        }
+
+        /* Estilo para el canvas de Three.js */
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>Geometría Gauchesca</h2>
+        <small>Malla Neuronal 3D / Fruta Design</small>
+    </div>
+
+    <div class="controls-panel">
+        <strong>COMANDOS DE NAVEGACIÓN:</strong><br>
+        [A / D] Rotar Eje Y (Horizontal)<br>
+        [W / Z] Rotar Eje X (Vertical)<br>
+        [Q / E] Zoom Dynamic (+/-)<br>
+        [ R ] Restaurar Vista<br>
+        [Mouse Arrastre] Rotación Libre<br>
+        [Mouse Scroll] Zoom de Precisión
+    </div>
+
+    <div id="canvas-container">
+        </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <script>
+        let scene, camera, renderer, faceMesh;
+        let rotationX = 0, rotationY = 0, zoom = 5;
+        const rotationSpeed = 0.02;
+        const zoomSpeed = 0.2;
+
+        // Variables para interacción de mouse
+        let isDragging = false;
+        let previousMouseX, previousMouseY;
+
+        init();
+        animate();
+
+        function init() {
+            // 1. Creación de la Escena
+            scene = new THREE.Scene();
+
+            // 2. Configuración de la Cámara
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = zoom;
+
+            // 3. El Motor de Renderizado
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            // 4. Geometría: Creación de la Malla de Cara (Abstracción)
+            // Three.js no tiene una cara predefinida, creamos una compleja con mallas y ruido
+            const faceGeometry = new THREE.IcosahedronGeometry(2, 4); // Base esférica compleja
+            
+            // "Esculpimos" la geometría para que parezca una cara (ruido matemático)
+            const positionAttribute = faceGeometry.attributes.position;
+            const vertex = new THREE.Vector3();
+            for (let i = 0; i < positionAttribute.count; i++) {
+                vertex.fromBufferAttribute(positionAttribute, i);
+                // Escala no uniforme para crear la forma ovoidal de la cara
+                vertex.x *= 0.8; 
+                vertex.y *= 1.2; 
+                // Añadimos ruido para los "rasgos" gauchescos abstractos
+                const noise = Math.sin(vertex.y * 5) * 0.1 + Math.cos(vertex.x * 3) * 0.05;
+                vertex.z += noise; 
+                positionAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z);
+            }
+
+            // 5. Material: El estilo Gaucho Cuántico (Líneas de MallaNeón)
+            const faceMaterial = new THREE.MeshBasicMaterial({
+                color: 0x00fbff, // Cian
+                wireframe: true, // Esto crea el efecto de malla neuronal
+                transparent: true,
+                opacity: 0.6
+            });
+
+            // Creamos la escultura 3D
+            faceMesh = new THREE.Mesh(faceGeometry, faceMaterial);
+            scene.add(faceMesh);
+
+            // 6. Luces: Iluminación de atmósfera
+            const ambientLight = new THREE.AmbientLight(0x404040, 2);
+            scene.add(ambientLight);
+
+            // 7. Configuración de Eventos (Keyboard & Mouse)
+            window.addEventListener('keydown', handleKeyDown);
+            window.addEventListener('wheel', handleWheel);
+            window.addEventListener('mousedown', onMouseDown);
+            window.addEventListener('mouseup', onMouseUp);
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        // --- Lógica de Controles ---
+
+        function handleKeyDown(event) {
+            switch(event.key.toUpperCase()) {
+                case 'A': faceMesh.rotation.y -= rotationSpeed * 2; break; // Rotación Y
+                case 'D': faceMesh.rotation.y += rotationSpeed * 2; break;
+                case 'W': faceMesh.rotation.x -= rotationSpeed * 2; break; // Rotación X
+                case 'Z': faceMesh.rotation.x += rotationSpeed * 2; break;
+                case 'Q': updateZoom(-zoomSpeed); break; // Zoom
+                case 'E': updateZoom(zoomSpeed); break;
+                case 'R': resetView(); break; // Restaurar
+            }
+        }
+
+        function handleWheel(event) {
+            updateZoom(event.deltaY * 0.002);
+        }
+
+        function updateZoom(delta) {
+            camera.position.z += delta;
+            // Límites para que no desaparezca
+            if (camera.position.z < 1) camera.position.z = 1;
+            if (camera.position.z > 20) camera.position.z = 20;
+        }
+
+        function resetView() {
+            camera.position.z = 5;
+            faceMesh.rotation.set(0, 0, 0);
+        }
+
+        // --- Interacción con Mouse (Giro) ---
+        function onMouseDown(event) { isDragging = true; previousMouseX = event.clientX; previousMouseY = event.clientY; }
+        function onMouseUp() { isDragging = false; }
+        function onMouseMove(event) {
+            if (!isDragging) return;
+            let deltaX = event.clientX - previousMouseX;
+            let deltaY = event.clientY - previousMouseY;
+            faceMesh.rotation.y += deltaX * 0.005;
+            faceMesh.rotation.x += deltaY * 0.005;
+            previousMouseX = event.clientX;
+            previousMouseY = event.clientY;
+        }
+
+        // --- Bucle de Animación ---
+        function animate() {
+            requestAnimationFrame(animate);
+            // Animación sutil de respiración (flotabilidad cuántica)
+            faceMesh.position.y = Math.sin(Date.now() * 0.001) * 0.1;
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+    </script>
+</body>
+</html>

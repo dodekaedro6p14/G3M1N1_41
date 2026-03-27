@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe Técnico: Transformación Energética Fúngica</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #818cf8;
+            --accent: #e74c3c;
+            --bg-color: #0f172a;
+            --text: #c9d1d9;
+            --white: #ffffff;
+            --black: #1e293b;
+            --color-fuente: #fff;
+            --color_fondo: #000;
+            --card-bg: #161b22;
+            --text-color: #c9d1d9;
+            --accent-color: #58a6ff;
+            --energy-color: #f9e231;
+            --border-color: #30363d;
+            --footer-color: #8b949e;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--black), var(--primary));
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        header h1 {
+            color: var(--energy-color);
+            margin: 0;
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        h2 {
+            color: var(--accent-color);
+            border-left: 5px solid var(--secondary);
+            padding-left: 1rem;
+            margin-top: 2rem;
+        }
+
+        h3 {
+            color: var(--secondary);
+            margin-top: 1.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            text-align: justify;
+        }
+
+        .fact-box {
+            background: rgba(88, 166, 255, 0.1);
+            border-radius: 5px;
+            padding: 1rem;
+            border-left: 4px solid var(--energy-color);
+            margin: 1rem 0;
+        }
+
+        .tech-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        .tech-table th, .tech-table td {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            text-align: left;
+        }
+
+        .tech-table th {
+            background-color: var(--primary);
+            color: var(--energy-color);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--footer-color);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .highlight {
+            color: var(--energy-color);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Proyecto: Transformación Energética de Hongos</h1>
+    <p>Informe de Ingeniería Molecular y Biología Sintética</p>
+</header>
+
+<div class="container">
+    <div class="card">
+        <h2>1. Introducción: La Revolución del "Fungal Fuel"</h2>
+        <p>En el contexto de la crisis energética global y la necesidad de descarbonizar la economía, el Reino Fungi emerge como una de las plataformas biotecnológicas más potentes. A diferencia de las bacterias, los hongos poseen un sistema enzimático extracelular excepcionalmente robusto, capaz de degradar la <span class="highlight">lignocelulosa</span>, el polímero más abundante y recalcitrante de la Tierra.</p>
+        
+        <p>Este informe analiza la capacidad de diversos taxones fúngicos para actuar como "biorefinerías celulares", transformando residuos agrícolas y forestales en biocombustibles (etanol, butanol, hidrógeno) o energía eléctrica directa a través de celdas de combustible microbianas (MFC).</p>
+    </div>
+
+    <div class="card">
+        <h2>2. Análisis Detallado de Especies Críticas</h2>
+
+        <h3>2.1 Neurospora intermedia: El Modelo de Fermentación de Residuos</h3>
+        <p><i>Neurospora intermedia</i> es un hongo ascomiceto con una larga historia en la industria alimentaria (producción de oncom), pero su relevancia energética reside en su capacidad para realizar la <b>Procesamiento Biológico Consolidado (CBP)</b>.</p>
+        <ul>
+            <li><strong>Mecanismo:</strong> Capacidad única de fermentar tanto hexosas (glucosa) como pentosas (xilosa) de forma simultánea, algo que la mayoría de las levaduras industriales no logran sin modificaciones genéticas costosas.</li>
+            <li><strong>Factibilidad:</strong> Muy alta para la producción de etanol a partir de flujos de residuos delgados (thin stillage). Es económicamente viable debido a que produce biomasa rica en proteínas que puede venderse como subproducto para alimentación animal.</li>
+            <li><strong>Uso:</strong> Conversión directa de residuos de destilería en biocombustibles.</li>
+        </ul>
+
+        <h3>2.2 Neocallimastigomycetes: Los Gigantes Anaerobios</h3>
+        <p>Estos hongos habitan en el rumen de herbívoros y son, quizás, los degradadores de biomasa más potentes conocidos por la ciencia.</p>
+        <div class="fact-box">
+            <strong>Dato Bioinformático:</strong> Los Neocallimastigomycetes poseen <span class="highlight">celulosomas</span>, complejos multienzimáticos que degradan la pared celular vegetal con una eficiencia 10 veces superior a los sistemas enzimáticos libres de bacterias comunes.
+        </div>
+        <p>Su impacto en la generación de energía se centra en la producción de <b>biogás (metano e hidrógeno)</b>. Al ser anaerobios estrictos, su integración en biodigestores permite romper la lignina que normalmente detiene la fermentación bacteriana.</p>
+
+        <h3>2.3 Trichoderma reesei: La Fábrica de Enzimas</h3>
+        <p>Es el "estándar de oro" industrial. Su genoma está optimizado para la secreción masiva de proteínas. No se utiliza para producir energía directamente, sino para crear el "cóctel enzimático" que degrada la celulosa en azúcares fermentables.</p>
+        <ul>
+            <li><strong>Producción en masa:</strong> Se cultiva en biorreactores de gran escala (hasta 200,000 litros) mediante fermentación sumergida (SmF).</li>
+            <li><strong>Impacto:</strong> Reduce el costo de los biocombustibles de segunda generación en un 40% gracias a la ingeniería de sus promotores (como el promotor <i>cbh1</i>).</li>
+        </ul>
+
+        <h3>2.4 Aspergillus y Penicillium: Versatilidad y Ácidos Orgánicos</h3>
+        <p><i>Aspergillus niger</i> y especies de <i>Penicillium</i> son utilizados para producir lípidos que pueden convertirse en <b>biodiesel</b>. Mediante técnicas de CRISPR-Cas9, se pueden sobreexpresar los genes de la ácido graso sintasa (FAS) para acumular hasta un 40% de su peso seco en aceites.</p>
+
+        <h3>2.5 Fusarium: El Potencial del Bioetanol</h3>
+        <p>Aunque es conocido como patógeno, <i>Fusarium oxysporum</i> tiene la rara habilidad de convertir la celulosa directamente en etanol en un solo paso anaeróbico. Sin embargo, su uso requiere estrictos controles de bioseguridad para evitar fugas al medio ambiente.</p>
+
+        <h3>2.6 Basidiomicetos: Los Maestros de la Lignina</h3>
+        <p>Hongos de la "putrefacción blanca" como <i>Phanerochaete chrysosporium</i>. Son esenciales para el pretratamiento biológico. Secretan <b>lignina peroxidasas</b> y <b>lacasas</b>.</p>
+        <p>En términos de energía, se están investigando para "Baterías Biológicas" donde las enzimas lacasas actúan como biocatalizadores en el cátodo de una celda de combustible, permitiendo una reducción de oxígeno más eficiente que los catalizadores de platino.</p>
+    </div>
+
+    <div class="card">
+        <h2>3. Factibilidad Económica y Generación Rápida</h2>
+        <table class="tech-table">
+            <thead>
+                <tr>
+                    <th>Especie</th>
+                    <th>Producto Energético</th>
+                    <th>Velocidad de Retorno</th>
+                    <th>Costo de Producción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Neurospora</td>
+                    <td>Etanol / Proteína</td>
+                    <td>Alta</td>
+                    <td>Bajo (Usa residuos)</td>
+                </tr>
+                <tr>
+                    <td>T. reesei</td>
+                    <td>Cócteles Enzimáticos</td>
+                    <td>Media</td>
+                    <td>Moderado (Escalamiento)</td>
+                </tr>
+                <tr>
+                    <td>Basidiomicetos</td>
+                    <td>Electrolitos / Biocarbón</td>
+                    <td>Lenta</td>
+                    <td>Bajo (Crecimiento sólido)</td>
+                </tr>
+                <tr>
+                    <td>Neocallimastigomycetes</td>
+                    <td>Hidrógeno / Metano</td>
+                    <td>Muy Alta</td>
+                    <td>Alto (Requiere anaerobiosis)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>4. Impacto Medioambiental y Sostenibilidad</h2>
+        <p>El uso de hongos para energía representa el modelo perfecto de <span class="highlight">Economía Circular</span>. Mientras que los combustibles fósiles liberan carbono secuestrado hace millones de años, el carbono liberado por biocombustibles fúngicos es parte del ciclo actual de la atmósfera (Carbono Neutro).</p>
+        <p><strong>Biorremediación:</strong> Muchos de estos hongos, especialmente <i>Aspergillus</i> y los Basidiomicetos, pueden degradar plásticos y metales pesados simultáneamente mientras producen biomasa energética, limpiando el suelo y el agua.</p>
+    </div>
+
+    <div class="card">
+        <h2>5. Propuesta de Biología Sintética (Input Técnico)</h2>
+        <p>Para maximizar el proyecto, propongo el uso de <b>Circuitos Genéticos de Lógica Booleana</b> insertados vía CRISPR en <i>Trichoderma reesei</i>. Podríamos diseñar una cepa que:</p>
+        <ol>
+            <li>Detecte la presencia de lignina (Sensor).</li>
+            <li>Active la secreción de lacasas (Puerta AND).</li>
+            <li>Una vez degradada la lignina, apague la producción de lacasas y active la fermentación de etanol (Switch metabólico).</li>
+        </ol>
+        <p>Esto optimizaría el ATP celular, dirigiendo toda la energía del hongo hacia el producto deseado sin desperdicio metabólico.</p>
+    </div>
+
+    <div class="card">
+        <h2>6. Datos Adicionales: Lo que el ojo humano no ve</h2>
+        <p>Como experta, te menciono tres factores que suelen olvidarse:</p>
+        <ul>
+            <li><strong>Comunicación Quorum Sensing:</strong> Los hongos coordinan la degradación masiva de biomasa mediante señales químicas. Si manipulamos estas señales, podemos "engañar" al cultivo para que trabaje a máxima velocidad incluso en densidades bajas.</li>
+            <li><strong>Nanopartículas:</strong> <i>Fusarium</i> y <i>Aspergillus</i> son capaces de biosintetizar nanopartículas de plata y oro. Estas partículas pueden integrarse en los electrodos de las celdas de combustible para mejorar la conductividad eléctrica de la biomasa.</li>
+            <li><strong>Electrosíntesis Microbiana:</strong> Algunos hongos pueden absorber electrones directamente de una fuente de energía eléctrica (como paneles solares) para reducir el CO2 en compuestos orgánicos complejos, actuando como una "batería líquida".</li>
+        </ul>
+    </div>
+</div>
+
+<footer>
+    <p>Informe generado por NANA - Experta en Biología Molecular y Celular</p>
+    <p>Basado en protocolos de Biología Sintética y iGEM Resources &copy; 2025</p>
+</footer>
+
+<script>
+    // Animación simple de entrada
+    document.addEventListener('DOMContentLoaded', () => {
+        const cards = document.querySelectorAll('.card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = `all 0.5s ease ${index * 0.2}s`;
+            
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    });
+</script>
+
+</body>
+</html>

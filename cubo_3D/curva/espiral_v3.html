@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Spiral - Centered Editable Network V3.0</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="filamentos-bg"></div>
+
+    <div class="stage">
+        <div class="carrusel" id="helix-table">
+            </div>
+    </div>
+
+    <div class="hub">
+        <div class="hub-title">CUANTICO_DOCS V3.0</div>
+        <div class="controles">
+            <span>CLIC: EDITAR/FOCALIZAR</span>
+            <span>ESC: SALIR/CENTRAR FRONTAL</span>
+            |
+            <span>A / D</span> Girar
+            <span>W / S</span> Arriba/Abajo
+            <span>Q / E</span> Zoom
+            <span>R</span> Reset
+        </div>
+        <div id="status" style="font-size: 10px; color: #666;">ESTADO: ESTABLE (NAVEGACIÓN FRONTAL ACTIVA)</div>
+    </div>
+
+    <script>
+        const helixContainer = document.getElementById('helix-table');
+        const statusDisplay = document.getElementById('status');
+        
+        // --- CONFIGURACIÓN DE EXPANSIÓN (EDITABLE) ---
+        // Generaremos 25 documentos editables
+        const totalNodesToGenerate = 25; 
+
+        // Recuperamos las variables CSS de geometría
+        const styleProps = getComputedStyle(document.documentElement);
+        const degPerElement = parseFloat(styleProps.getPropertyValue('--grados-por-elemento'));
+        const yDescendPerElement = parseFloat(styleProps.getPropertyValue('--descenso-por-elemento'));
+        const focusZOffset = parseFloat(styleProps.getPropertyValue('--focus-offset'));
+        
+        // El radio debe ser constante para todos los elementos
+        const radius = 800; 
+
+        // Variables de estado
+        let currentRot = 0;
+        let currentZoom = -radius; // Distancia focal inicial
+        let currentYNav = 0; // Navegación vertical manual (W/S)
+        let totalYSpiralHeight = 0; // Altura teórica de la hélice
+
+        // --- LÓGICA DE SUPERPOSICIÓN (FOCUS) ---
+        let nodeFocused = false;
+        let focusedNodeRef = null;
+
+        // --- MOTOR DE DIRECCIÓN Y AUTO-CENTRADO ---
+        function updateFrame() {
+            // 1. Calculamos la rotación normalizada (0 a 360)
+            let normalizedRot = currentRot % 360;
+            if (normalizedRot < 0) normalizedRot += 360;
+
+            // --- ALGORITMO DE AUTO-CENTRADO FRONTAL ---
+            // Buscamos qué nodo teóricamente está a angleY=0
+            // Como degPerElement es constante, el nodo es normalizedRot / degPerElement
+            const indexNodeAt0deg = Math.round(normalizedRot / degPerElement);
+            
+            // Calculamos el translateY teórico de ese nodo
+            const ySpiralNodeAt0 = (indexNodeAt0deg * yDescendPerElement);
+            
+            // Calculamos el translateY de compensación para centrarlo.
+            // Queremos que ySpiralNodeAt0 sea Y=0 en pantalla.
+            // 'offsetYCentering' es el valor de la hélice completa
+            const offsetYCentering = ySpiralNodeAt0;
+
+            // 2. Aplicamos las transformaciones al contenedor global (carrusel)
+            // Combinamos el centrado automático (-offsetYCentering) con la navegación manual (currentYNav)
+            helixContainer.style.transform = `
+                translateY(${-offsetYCentering + currentYNav}px) 
+                translateZ(${currentZoom}px) 
+                rotateY(${-currentRot}deg)
+            `;
+
+            // Si hay un nodo enfocado, debemos aplicar su transformación especial de superposición
+            if (nodeFocused && focusedNodeRef) {
+                applyFocusTransform(focusedNodeRef, offsetYCentering);
+            }
+        }
+
+        function applyFocusTransform(nodeRef, carruselYCentering) {
+            // Recuperamos los datos del nodo desde el dataset
+            const idx = parseInt(nodeRef.dataset.index);
+            
+            // Calculamos la posición del nodo en la hélice
+            const theta = idx * degPerElement;
+            const yPosInSpiral = idx * yDescendPerElement;
+
+            // La transformación de Focus debe superar la transformación de centrado
+            // para que el nodo aparezca siempre centrado y al frente.
+            // Queremos que el nodo esté en Z_Focus y Angle=0.
+            
+            // Calculamos la rotación necesaria para que este nodo específico mire al frente.
+            // (La hélice está girada a '-currentRot', este nodo a 'theta')
+            const specificFocusRotation = currentRot + theta;
+            
+            // Calculamos la altura necesaria para que esté en Y=0
+            // La hélice está en '-carruselYCentering + currentYNav'
+            const specificFocusY = carruselYCentering - currentYNav;
+
+            // Aplicamos la transformación dramática de superposición
+            // Esto sobrescribe temporalmente el transform del CSS
+            nodeRef.style.transform = `
+                rotateY(${currentRot}deg) 
+                translateY(${-yPosInSpiral}px) 
+                translateZ(${radius + focusZOffset}px) 
+                scale(1.2)
+            `;
+        }
+
+        function resetFocus() {
+            if (focusedNodeRef) {
+                const idx = parseInt(focusedNodeRef.dataset.index);
+                const theta = idx * degPerElement;
+                const yPos = idx * yDescendPerElement;
+
+                // Restauramos la transformación helical normal
+                focusedNodeRef.style.transform = `rotateY(${theta}deg) translateY(${yPos}px) translateZ(${radius}px)`;
+                focusedNodeRef.classList.remove('focused-node');
+                
+                // Salimos del modo de edición si estaba activo
+                focusedNodeRef.querySelectorAll('[contenteditable="true"]').forEach(el => el.blur());
+            }
+            nodeFocused = false;
+            focusedNodeRef = null;
+            document.body.classList.remove('overlay-active');
+            statusDisplay.innerText = "ESTADO: ESTABLE (NAVEGACIÓN FRONTAL ACTIVA)";
+            statusDisplay.style.color = "#666";
+            updateFrame(); // Actualizamos para que la hélice se reajuste
+        }
+
+        // --- CONSTRUCTOR DE LA HÉLICE EDITABLE ---
+        function buildEditableHelix() {
+            helixContainer.innerHTML = ''; // Limpiar
+
+            for (let index = 0; index < totalNodesToGenerate; index++) {
+                const elDiv = document.createElement('div');
+                elDiv.className = 'elemento';
+                elDiv.dataset.index = index; // Guardamos el índice
+
+                // INYECCIÓN DEL TEXTO DE ORIGEN (EDITABLE)
+                elDiv.innerHTML = `
+                    <div class="doc-header" contenteditable="true">NODO INF-0${String(index + 1).padStart(2, '0')}</div>
+                    <div class="doc-content" contenteditable="true">
+                        <p><strong>Interacción Cuántica detectada.</strong></p>
+                        <p>Analizando filamentos luminosos en la capa de datos... El vacío no es oscuridad, es energía en reposo esperando ser observada.</p>
+                        <hr style="border: 0.5px solid rgba(0,242,255,0.2)">
+                        <p>Este es un contenedor para documentos completos. La arquitectura CSS permite visualizar el contenido con un efecto de profundidad envolvente.</p>
+                        <p>Utiliza las funciones de teclado para desplazarte por la red de información.</p>
+                        <p>Cada documento es editable desde la web y se ajusta automáticamente al centro frontal al navegar.</p>
+                    </div>
+                `;
+
+                // --- POSICIONAMIENTO HELICAL (HÉLICE PERFECTA) ---
+                const theta = index * degPerElement;
+                const yPos = index * yDescendPerElement;
+                elDiv.style.transform = `rotateY(${theta}deg) translateY(${yPos}px) translateZ(${radius}px)`;
+
+                // --- GESTIÓN DE EVENTOS PARA FOCUS/EDICIÓN ---
+                elDiv.addEventListener('click', (e) => {
+                    // Evitamos que el clic se propague si hacemos clic dentro del contenido
+                    if (nodeFocused && focusedNodeRef === elDiv) return;
+                    
+                    if (nodeFocused) resetFocus(); // Si había otro enfocado, lo reseteamos
+
+                    nodeFocused = true;
+                    focusedNodeRef = elDiv;
+                    elDiv.classList.add('focused-node');
+                    document.body.classList.add('overlay-active');
+                    statusDisplay.innerText = "ESTADO: EDITANDO DOCUMENTO (FOCALIZADO)... [Pulse ESC para salir]";
+                    statusDisplay.style.color = "var(--neon-pink)";
+                    updateFrame(); // Actualizamos para que el carrusel se mueva
+                });
+
+                helixContainer.appendChild(elDiv);
+            }
+            // Altura total teórica
+            totalYSpiralHeight = totalNodesToGenerate * yDescendPerElement;
+        }
+
+        // --- MOTOR DE TECLADO ---
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            
+            // --- GESTIÓN ESPECIAL DEL FOCUS Y ESCAPE ---
+            if (e.key === 'Escape') {
+                resetFocus();
+                return; // Detener el motor de navegación
+            }
+
+            // Si estamos editando y focalizados, bloqueamos la navegación normal
+            if (nodeFocused) return; 
+            
+            const step = 4;           // Velocidad de rotación
+            const zoomStep = 40;      // Velocidad de zoom
+            const verticalStep = 30;  // Velocidad de navegación vertical
+
+            // Rotación A / D (Ahora infinita, el centrado lo gestiona 'updateFrame')
+            if (key === 'a') currentRot += step;
+            if (key === 'd') currentRot -= step;
+
+            // Navegación Vertical Manual W / S (Para subir/bajar por la hélice)
+            if (key === 'w') currentYNav += verticalStep; // Subir hélice (sentir que bajas)
+            if (key === 's') currentYNav -= verticalStep; // Bajar hélice (sentir que subes)
+
+            // Zoom Q / E
+            if (key === 'q') currentZoom += zoomStep;
+            if (key === 'e') currentZoom -= zoomStep;
+
+            // Reset Matriz (R)
+            if (key === 'r') { 
+                currentRot = 0; 
+                currentZoom = -radius; 
+                currentYNav = 0; 
+                resetFocus();
+            }
+
+            updateFrame();
+        });
+
+        // Inicialización
+        buildEditableHelix();
+        updateFrame();
+    </script>
+</body>
+</html>

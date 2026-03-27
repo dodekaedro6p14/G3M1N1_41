@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Nana Bio-3D V2.5 - Morfogénesis</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>🌱 Bio-Synthesizer 3D - V2.5</h1>
+    <div class="main-layout">
+        <section class="panel">
+            <h3>Panel de Morfogénesis (ADN)</h3>
+            <p>Introduce secuencia (Ej: RED-P12-W40-L80):</p>
+            <textarea id="dnaInput" placeholder="Color-Pétalos-Ancho-Largo...">RED-P8-W30-L70</textarea>
+            
+            <div class="button-group">
+                <button onclick="synthesizeFlower()">Sintetizar Especie</button>
+                <button onclick="resetView()">Reset Cámara (R)</button>
+            </div>
+
+            <div id="bricksLog" class="bricks-display">Esperando secuencia...</div>
+            
+            <div class="controls-help">
+                <p><strong>Teclado:</strong> A/D (Eje Y) | W/Z (Eje X) | Q/E (Zoom)</p>
+                <p><strong>Mouse:</strong> Click + Arrastrar para rotar | Scroll para Zoom</p>
+            </div>
+        </section>
+
+        <section class="viewport" id="mouseArea">
+            <div class="scene">
+                <div class="flower-3d" id="flower">
+                    <div class="stem-3d">
+                        <div class="s-face f1"></div>
+                        <div class="s-face f2"></div>
+                        <div class="s-face f3"></div>
+                        <div class="s-face f4"></div>
+                    </div>
+                    
+                    <div class="center-bulb"></div>
+                    
+                    <div id="petalContainer" style="transform-style: preserve-3d;"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>     

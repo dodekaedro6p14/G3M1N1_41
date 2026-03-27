@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador Celular 3D - Perspective Lab</title>
+    <link rel="stylesheet" href="./css/style_celula.css">
+</head>
+<body>
+
+    <canvas id="canvas-particles"></canvas>
+
+    <div class="ui-panel">
+        <h3 style="margin:0; color:var(--accent-color);">Laboratorio Bio-Digital</h3>
+        <p style="font-size: 0.9em; opacity: 0.8;">Célula Humana en Perspectiva 3D (50°)</p>
+    </div>
+
+    <div class="world">
+        <div class="cell-membrane">
+            <div class="organelle-layer">
+                
+                <a href="./mitocondria/mitocondria_1.html" class="organelle" style="width: 150px; top: 75%; left: 12%;">
+                    <img src="ima/mitocondria_sinfondo_ori.png" alt="Mitocondria">Mitocondria</a>
+		<a href="./mitocondria/mitocondria_1.html" class="organelle" style="width: 150px; top: 19%; left: 70%;">
+                    <img src="ima/mitocondria_sinfondo_ori.png" alt="Mitocondria">
+                    </a>
+		<a href="./mitocondria/mitocondria_1.html" class="organelle" style="width: 180px; top: 80%; left: 45%;">
+            	    <img src="ima/mitocondria_sinfondo_2.png" text="Mitocondria" alt="Mitocondria">
+       		    </a>
+		<a href="./mitocondria/mitocondria_1.html" class="organelle" style="width: 120px; top: 34%; left: 4%;">
+            	    <img src="ima/mitocondria_sinfondo_2.png" text="Mitocondria" alt="Mitocondria">
+       		    </a>
+
+
+              
+		<a href="#lisosomes.html" class="organelle" style="width: 45px; top: 41%; left: 87%;">
+            	    <img src="ima/lisosomes_sinfondo.png" text="Mitocondria" alt="Mitocondria">
+       		    </a>
+        <a href="./nucleo_celular/nucleo_celular-H_v1.html" class="organelle" style="width: 300px; top: 7%; left: 30%;">
+                    <img src="ima/nucleo_sinfondo.png" text="Núcleo" alt="Núcleo">  </a>
+        
+		<a href="#lisosomes.html" class="organelle" style="width: 50px; top: 64%; left: 56%;">
+            	    <img src="ima/lisosomes_sinfondo.png" text="Mitocondria" alt="Mitocondria">
+       		    </a>
+		<a href="#lisosomes.html" class="organelle" style="width: 40px; top: 71%; left: 44%;">
+            	    <img src="ima/lisosomes_sinfondo.png" text="Mitocondria" alt="Mitocondria">
+       		    </a>
+
+		<a href="aparato_golgi_V1.html" class="organelle" style="width: 175px; top: 60%; left: 70%;">
+            	    <img src="ima/aparato_golgi_sinfondo_2.png" text="Golgi Apparatus" alt="Aparato de Golgi">
+       		    </a>
+		
+		<a href="#peroximes.html" class="organelle" style="width: 35px; top: 17%; left: 18%;">
+            	    <img src="ima/peroximes_sinfondo.png" text="Mitocondria" alt="Mitocondria">
+       		    </a>
+		<a href="#peroximes.html" class="organelle" style="width: 40px; top: 57%; left: 4%;">
+            	    <img src="ima/peroximes_sinfondo.png" text="Mitocondria" alt="Mitocondria">
+       		    </a>
+		<a href="#peroximes.html" class="organelle" style="width: 40px; top: 88%; left: 36%;">
+            	    <img src="ima/peroximes_sinfondo.png" text="Mitocondria" alt="Mitocondria">
+       		    </a>
+
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // MOTOR DE PARTÍCULAS (JavaScript Animación)
+        const canvas = document.getElementById('canvas-particles');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.5;
+                this.speedY = (Math.random() - 0.5) * 0.5;
+                this.alpha = Math.random() * 0.5;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+            }
+            draw() {
+                ctx.fillStyle = `rgba(201, 209, 217, ${this.alpha})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 100; i++) particles.push(new Particle());
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+</html>

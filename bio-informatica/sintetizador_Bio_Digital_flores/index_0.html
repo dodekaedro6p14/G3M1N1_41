@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Nana Bio-3D V2</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>🌱 Bio-Synthesizer 3D - V2.0</h1>
+    <div class="main-layout">
+        <section class="panel">
+            <h3>Secuenciador ADN</h3>
+            <textarea id="dnaInput" placeholder="Secuencia...">ATGC-RED-GOLD</textarea>
+            <button onclick="synthesizeFlower()">Sintetizar</button>
+            <div id="bricksLog" class="bricks-display">Esperando secuencia...</div>
+            <div class="controls-help">
+                <p><strong>Controles 3D:</strong></p>
+                <p>A / D: Rotar | Q / E: Zoom | R: Reset</p>
+            </div>
+        </section>
+
+        <section class="viewport">
+            <div class="scene" id="scene3d">
+                <div class="flower-3d" id="flower">
+                    <div class="stem"></div>
+                    <div class="center-bulb"></div>
+                    <div class="petal p1"></div>
+                    <div class="petal p2"></div>
+                    <div class="petal p3"></div>
+                    <div class="petal p4"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

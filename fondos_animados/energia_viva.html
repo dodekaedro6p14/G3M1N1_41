@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tormenta Eléctrica Geométrica Viva - Python_negro Edition</title>
+    <style>
+        /* --- ESTILOS CSS GENERALES ---
+           Definimos el entorno oscuro y eliminamos márgenes.
+        */
+        :root {
+            --bg-color: #010204; /* Negro profundo para máximo contraste */
+            --text-color: #eee;
+            --font-stack: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            
+            /* Colores de interfaz sobrepuesta (para validación de profundidad) */
+            --card-bg: rgba(22, 27, 34, 0.7);
+            --border-color: #30363d;
+            --accent-glow: #00f0ff; 
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* Previene barras de desplazamiento */
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-stack);
+        }
+
+        /* --- CONTENEDOR DE LA ESCENA ---
+           Fija el lienzo de animación a toda la pantalla.
+        */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0; /* Capa de fondo */
+        }
+
+        #tormenta-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Ejemplo de contenido sobrepuesto para validar la profundidad */
+        .interface-overlay {
+            position: relative;
+            z-index: 10; /* Sobre la animación */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            pointer-events: none; /* Permite clics a través de la interfaz */
+        }
+
+        .central-card {
+            background: var(--card-bg);
+            padding: 3rem;
+            border-radius: 16px;
+            backdrop-filter: blur(10px); /* Efecto de cristal esmerilado */
+            border: 1px solid var(--border-color);
+            text-align: center;
+            pointer-events: auto; /* Reactiva clics en la tarjeta */
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+        }
+
+        .central-card h1 {
+            margin-top: 0;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent-glow);
+            text-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .central-card p {
+            color: #ccc;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container">
+        <canvas id="tormenta-canvas"></canvas>
+    </div>
+
+    <div class="interface-overlay">
+        <div class="central-card">
+            <h1>Red de Energía Viva</h1>
+            <p>Una tormenta eléctrica geométrica animada.</p>
+            <p>Los rayos parpadean con colores fluorescentes editables.</p>
+        </div>
+    </div>
+
+    <script>
+        /* --- MOTOR DE ANIMACIÓN JAVASCRIPT ---
+           Este script recrea la geometría de la imagen base y genera
+           un sistema de rayos eléctricos ramificados y parpadeantes.
+        */
+
+        const canvas = document.getElementById('tormenta-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        // Listas de elementos de la escena
+        const mountainPoints = [];
+        const floatingShards = [];
+        const activeBolts = [];
+
+        /* --- [EDITABLE: CONFIGURACIÓN DE LA TORMENTA] ---
+           Modifica estos valores para personalizar la animación.
+        */
+        const CONFIG = {
+            shardCount: 40,               // Cantidad de fragmentos geométricos flotantes
+            boltFrequency: 0.015,         // Probabilidad de que aparezca un rayo por fotograma (0.0 a 1.0)
+            boltLife: 20,                 // Duración del parpadeo del rayo (fotogramas)
+            maxBranchDepth: 2,            // Cuántas veces se puede ramificar un rayo
+            glowIntensity: 25,             // Intensidad del resplandor (blur)
+            matchShards: true             // Si es true, los rayos conectan fragmentos. Si es false, son aleatorios.
+        };
+
+        /* --- [EDITABLE: PALETA DE COLORES FLUORESCENTES] ---
+           Lista de colores para los rayos y fragmentos. Usa HSL para máxima vibración.
+        */
+        const COLOR_PALETTE = [
+            'hsl(180, 100%, 70%)', // Cyan
+            'hsl(300, 100%, 70%)', // Magenta
+            'hsl(60, 100%, 70%)',  // Amarillo neón
+            'hsl(220, 100%, 75%)', // Azul vibrante
+            'hsl(120, 100%, 70%)'  // Verde eléctrico
+        ];
+
+        // Función para ajustar el tamaño del canvas y regenerar la geometría base
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            regenerarGeometriaBase();
+        }
+
+        // --- CLASES DE OBJETOS GEOMÉTRICOS ---
+
+        // Define un fragmento flotante (basado en la imagen)
+        class Shard {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                // Posición base (estática pero relativa al tamaño de pantalla)
+                this.baseX = Math.random() * width;
+                this.baseY = Math.random() * height * 0.7; // Solo en la parte superior/media
+                
+                // Movimiento sutil de flotación (bamboleo)
+                this.seedX = Math.random() * Math.PI * 2;
+                this.seedY = Math.random() * Math.PI * 2;
+                this.speedX = 0.001 + Math.random() * 0.002;
+                this.speedY = 0.001 + Math.random() * 0.002;
+                this.drift = 8 + Math.random() * 10; // Amplitud del movimiento
+
+                // Visuales
+                this.size = 3 + Math.random() * 12;
+                this.color = COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)];
+                this.vertices = this.generateVertices();
+            }
+
+            generateVertices() {
+                const vertices = [];
+                const sides = 3 + Math.floor(Math.random() * 3); // Triángulos o trapezoides
+                for (let i = 0; i < sides; i++) {
+                    const angle = (i / sides) * Math.PI * 2 + Math.random() * 0.5;
+                    const dist = this.size * (0.5 + Math.random() * 1);
+                    vertices.push({
+                        x: Math.cos(angle) * dist,
+                        y: Math.sin(angle) * dist
+                    });
+                }
+                return vertices;
+            }
+
+            update(time) {
+                // Actualizar la posición basada en el bamboleo sinoidal
+                this.x = this.baseX + Math.sin(time * this.speedX + this.seedX) * this.drift;
+                this.y = this.baseY + Math.cos(time * this.speedY + this.seedY) * this.drift;
+            }
+
+            draw(ctx) {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                
+                // Efecto de resplandor fluorescente (glow)
+                ctx.shadowBlur = CONFIG.glowIntensity * 0.8;
+                ctx.shadowColor = this.color;
+                
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
+                for (let i = 1; i < this.vertices.length; i++) {
+                    ctx.lineTo(this.vertices[i].x, this.vertices[i].y);
+                }
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+
+        // Define un rayo eléctrico individual parpadeante
+        class LightningBolt {
+            constructor(startX, startY, endX, endY, color) {
+                this.startX = startX;
+                this.startY = startY;
+                this.endX = endX;
+                this.endY = endY;
+                this.color = color;
+                this.life = CONFIG.boltLife; // Duración
+                this.opacity = 1;
+                this.path = this.generatePath(startX, startY, endX, endY);
+            }
+
+            // Genera el camino dentado del rayo (fractal sutil)
+            generatePath(sx, sy, ex, ey) {
+                const path = [{ x: sx, y: sy }];
+                const segments = 10;
+                const dx = ex - sx;
+                const dy = ey - sy;
+
+                for (let i = 1; i < segments; i++) {
+                    const t = i / segments;
+                    // Punto intermedio ideal
+                    let px = sx + dx * t;
+                    let py = sy + dy * t;
+                    
+                    // Añadir desviación aleatoria (el "jaggedness")
+                    const deviation = 15;
+                    px += (Math.random() - 0.5) * deviation;
+                    py += (Math.random() - 0.5) * deviation;
+                    
+                    path.push({ x: px, y: py });
+
+                    // Probabilidad de ramificación
+                    if (Math.random() < 0.1 && segments < 15) { // Ramificación limitada
+                        const branchEndX = px + (Math.random() - 0.5) * 50;
+                        const branchEndY = py + (Math.random() - 0.5) * 60;
+                        this.pathRamificada = this.generatePath(px, py, branchEndX, branchEndY); // Generar rama recursiva sutil
+                    }
+                }
+                path.push({ x: ex, y: ey }); // Punto final
+                return path;
+            }
+
+            update() {
+                this.life--;
+                this.opacity = this.life / CONFIG.boltLife; // Desvanecimiento
+            }
+
+            draw(ctx) {
+                if (this.life <= 0) return;
+
+                ctx.save();
+                
+                // Efecto de parpadeo de color y grosor
+                const parpadeo = Math.random() > 0.5 ? 1 : 0.6;
+                ctx.lineWidth = 2 + Math.random() * 2 * parpadeo;
+                ctx.strokeStyle = this.color.replace('70%)', `80%, ${this.opacity * parpadeo})`); // Más brillante al parpadear
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                // Efecto de resplandor intenso (glow)
+                ctx.shadowBlur = CONFIG.glowIntensity * parpadeo;
+                ctx.shadowColor = this.color;
+
+                this.drawPath(ctx, this.path);
+                
+                // Dibujar rama si existe
+                if (this.pathRamificada) {
+                    ctx.lineWidth *= 0.6; // Rama más fina
+                    this.drawPath(ctx, this.pathRamificada);
+                }
+
+                ctx.restore();
+            }
+
+            drawPath(ctx, path) {
+                ctx.beginPath();
+                ctx.moveTo(path[0].x, path[0].y);
+                for (let i = 1; i < path.length; i++) {
+                    ctx.lineTo(path[i].x, path[i].y);
+                }
+                ctx.stroke();
+            }
+        }
+
+        // --- FUNCIONES DE GENERACIÓN DE GEOMETRÍA ---
+
+        function regenerarGeometriaBase() {
+            // 1. Recrear montañas oscuras estáticas
+            mountainPoints.length = 0;
+            const mColor = '#050a14'; // Azul oscuro muy profundo
+            
+            // Puntos de la montaña base (basados en la estructura de la imagen)
+            const pts = [
+                { x: 0, y: height * 0.8 },
+                { x: width * 0.2, y: height * 0.75 },
+                { x: width * 0.35, y: height * 0.7 },
+                { x: width * 0.45, y: height * 0.75 },
+                { x: width * 0.5, y: height * 0.65 }, // Pico central
+                { x: width * 0.55, y: height * 0.75 },
+                { x: width * 0.65, y: height * 0.7 },
+                { x: width * 0.8, y: height * 0.75 },
+                { x: width, y: height * 0.8 }
+            ];
+            
+            // Dibujar la montaña base una vez y guardarla como imagen de fondo (optimización)
+            // Para este ejemplo, la dibujaremos en cada frame por simplicidad de código único.
+            mountainPoints.push(...pts);
+
+            // 2. Recrear fragmentos flotantes
+            floatingShards.length = 0;
+            for (let i = 0; i < CONFIG.shardCount; i++) {
+                floatingShards.push(new Shard());
+            }
+        }
+
+        function createLightningBolt() {
+            if (Math.random() > CONFIG.boltFrequency) return;
+
+            let startX, startY, endX, endY, color;
+
+            if (CONFIG.matchShards && floatingShards.length >= 2) {
+                // Conectar dos fragmentos activos
+                const shardA = floatingShards[Math.floor(Math.random() * floatingShards.length)];
+                const shardB = floatingShards[Math.floor(Math.random() * floatingShards.length)];
+                if (shardA === shardB) return; // Evitar conectar consigo mismo
+                
+                startX = shardA.x;
+                startY = shardA.y;
+                endX = shardB.x;
+                endY = shardB.y;
+                color = shardA.color; // Usar color del fragmento de origen
+
+            } else {
+                // Rayo aleatorio en el cielo
+                startX = Math.random() * width;
+                startY = Math.random() * height * 0.4;
+                endX = startX + (Math.random() - 0.5) * 200;
+                endY = startY + (Math.random() + 0.5) * 300; // Tiende a bajar
+                color = COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)];
+            }
+
+            activeBolts.push(new LightningBolt(startX, startY, endX, endY, color));
+        }
+
+        // --- BUCLE DE ANIMACIÓN PRINCIPAL ---
+
+        function animate(time) {
+            // Limpiar el canvas con un negro profundo
+            ctx.fillStyle = '#010204'; 
+            ctx.fillRect(0, 0, width, height);
+            
+            // Un sutil efecto de resplandor ambiental (opcional, puede reducir rendimiento)
+            // ctx.shadowBlur = 0;
+
+            // 1. Dibujar montañas oscuras estáticas
+            ctx.fillStyle = '#050a14'; // Color de montaña oscuro
+            ctx.beginPath();
+            ctx.moveTo(mountainPoints[0].x, mountainPoints[0].y);
+            for (let i = 1; i < mountainPoints.length; i++) {
+                ctx.lineTo(mountainPoints[i].x, mountainPoints[i].y);
+            }
+            // Cerrar la forma por la parte inferior de la pantalla
+            ctx.lineTo(width, height);
+            ctx.lineTo(0, height);
+            ctx.closePath();
+            ctx.fill();
+
+            // 2. Actualizar y dibujar fragmentos flotantes
+            for (const shard of floatingShards) {
+                shard.update(time);
+                shard.draw(ctx);
+            }
+
+            // 3. Generar, actualizar y dibujar rayos eléctricos
+            createLightningBolt();
+            
+            for (let i = activeBolts.length - 1; i >= 0; i--) {
+                activeBolts[i].update();
+                activeBolts[i].draw(ctx);
+                
+                // Eliminar rayos que han desvanecido
+                if (activeBolts[i].life <= 0) {
+                    activeBolts.splice(i, 1);
+                }
+            }
+            
+            // Punto de energía central parpadeante (el pico de la montaña)
+            const centralPulse = Math.sin(time * 0.05) * 0.5 + 0.5;
+            const centralColor = COLOR_PALETTE[0]; // Cyan
+            ctx.shadowBlur = CONFIG.glowIntensity * centralPulse;
+            ctx.shadowColor = centralColor;
+            ctx.fillStyle = centralColor.replace('70%)', `90%, ${0.5 + centralPulse * 0.5})`);
+            ctx.beginPath();
+            ctx.arc(width * 0.5, height * 0.65, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0; // Resetear blur global
+
+            // Solicitar el siguiente fotograma
+            requestAnimationFrame(animate);
+        }
+
+        // --- INICIALIZACIÓN ---
+
+        window.addEventListener('resize', resize);
+        resize(); // Configuración inicial y primer mapeo
+        requestAnimationFrame(animate); // Iniciar bucle
+
+    </script>
+</body>
+</html>

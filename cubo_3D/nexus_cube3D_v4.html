@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusCube 3D - Editable</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #1a1a1a;
+            font-family: 'Segoe UI', sans-serif;
+            color: white;
+            overflow: hidden;
+        }
+
+        .instrucciones {
+            position: absolute;
+            top: 20px;
+            background: rgba(0, 255, 204, 0.1);
+            border: 1px solid #00ffcc;
+            padding: 15px 25px;
+            border-radius: 8px;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .scene {
+            width: 300px;
+            height: 300px;
+            perspective: 1200px;
+            margin-top: 50px;
+        }
+
+        .cube {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.2s ease-out;
+        }
+
+        .face {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border: 2px solid #00ffcc;
+            background: rgba(0, 20, 15, 0.9);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+            backface-visibility: visible;
+        }
+
+        /* Posiciones de las caras */
+        .front  { transform: rotateY(0deg) translateZ(150px); }
+        .right  { transform: rotateY(90deg) translateZ(150px); }
+        .back   { transform: rotateY(180deg) translateZ(150px); }
+        .left   { transform: rotateY(-90deg) translateZ(150px); }
+        .top    { transform: rotateX(90deg) translateZ(150px); }
+        .bottom { transform: rotateX(-90deg) translateZ(150px); }
+
+        .enlace-carpeta {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 255, 204, 0.1);
+            border: 1px solid rgba(0, 255, 204, 0.5);
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-size: 10px;
+            transition: all 0.3s;
+        }
+
+        .enlace-carpeta:hover {
+            background: rgba(0, 255, 204, 0.4);
+            box-shadow: 0 0 10px #00ffcc;
+            transform: scale(1.05);
+        }
+
+        .icono { font-size: 20px; margin-bottom: 2px; }
+    </style>
+</head>
+<body>
+
+    <div class="instrucciones">
+        <p>W,Z (X) | A,D (Y) | Q,E (Zoom) | R (Reset)</p>
+    </div>
+
+    <div class="scene">
+        <div class="cube" id="cube">
+            
+            <div class="face front">
+                <a href="https://www.google.com" target="_blank" class="enlace-carpeta"><span class="icono">🌐</span><span>Google</span></a>                
+                <a href="https://github.com/dodekaedro6p14" target="_blank" class="enlace-carpeta"><span class="icono">📁</span><span>gitHub</span></a>
+                <a href="#" class="enlace-carpeta"><span class="icono">📁</span><span>Link 3</span></a>
+                <a href="#" class="enlace-carpeta"><span class="icono">📁</span><span>Link 4</span></a>
+                <a href="#" class="enlace-carpeta"><span class="icono">📁</span><span>Link 5</span></a>
+                <a href="#" class="enlace-carpeta"><span class="icono">📁</span><span>Link 6</span></a>
+                <a href="#" class="enlace-carpeta"><span class="icono">📁</span><span>Link 7</span></a>
+                <a href="#" class="enlace-carpeta"><span class="icono">📁</span><span>Link 8</span></a>
+                <a href="#" class="enlace-carpeta"><span class="icono">📁</span><span>Link 9</span></a>
+            </div>
+
+            <div class="face right">
+                <a href="#" class="enlace-carpeta"><span class="icono">📁</span><span>Link 10</span></a>
+                </div>
+
+            <div class="face back">
+                <a href="#" class="enlace-carpeta"><span class="icono">📁</span><span>Link 19</span></a>
+                </div>
+
+            <div class="face left">
+                <a href="#" class="enlace-carpeta"><span class="icono">📁</span><span>Link 28</span></a>
+                </div>
+
+            <div class="face top">
+                <a href="#" class="enlace-carpeta"><span class="icono">📁</span><span>Link 37</span></a>
+                </div>
+
+            <div class="face bottom">
+                <a href="#" class="enlace-carpeta"><span class="icono">📁</span><span>Link 46</span></a>
+                </div>
+
+        </div>
+    </div>
+
+    <script>
+        let angleX = -15, angleY = -25, scale = 1;
+        const cube = document.getElementById('cube');
+
+        function update() {
+            cube.style.transform = `scale(${scale}) rotateX(${angleX}deg) rotateY(${angleY}deg)`;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            if(key === 'a') angleY -= 10;
+            if(key === 'd') angleY += 10;
+            if(key === 'w') angleX += 10;
+            if(key === 'z') angleX -= 10;
+            if(key === 'q') scale += 0.1;
+            if(key === 'e') scale -= 0.1;
+            if(key === 'r') { angleX = -15; angleY = -25; scale = 1; }
+            scale = Math.max(0.3, Math.min(scale, 2));
+            update();
+        });
+
+        update();
+    </script>
+</body>
+</html>         

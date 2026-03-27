@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Célula Humana Interactiva Pro</title>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        h1 { color: #38bdf8; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .cell-container { width: 90%; max-width: 700px; filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.2)); }
+        
+        /* Efectos de interacción */
+        .organelle { cursor: pointer; transition: all 0.3s ease; opacity: 0.9; }
+        .organelle:hover { opacity: 1; filter: brightness(1.3) contrast(1.1); stroke: #fff; stroke-width: 2px; }
+        
+        .info-card { margin-top: 20px; padding: 20px; border-radius: 12px; background: #1e293b; border: 1px solid #334155; max-width: 500px; text-align: center; }
+        code { color: #fb7185; background: #312e81; padding: 2px 4px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <h1>Explorador Celular Interactivo</h1>
+    <p>Haz clic en cualquier estructura para estudiar su función.</p>
+
+    <div class="cell-container">
+        <svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <radialGradient id="cytoGrad" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" style="stop-color:#fef08a;stop-opacity:0.3" />
+                    <stop offset="100%" style="stop-color:#e879f9;stop-opacity:0.2" />
+                </radialGradient>
+            </defs>
+
+            <a href="membrana.html">
+                <ellipse class="organelle" cx="250" cy="250" rx="240" ry="210" fill="url(#cytoGrad)" stroke="#a855f7" stroke-width="8">
+                    <title>Membrana Plasmática</title>
+                </ellipse>
+            </a>
+
+            <a href="rer.html">
+                <path class="organelle" d="M160,250 Q160,150 250,140 T340,250" fill="none" stroke="#f43f5e" stroke-width="15" stroke-linecap="round" opacity="0.6">
+                    <title>Retículo Endoplasmático Rugoso</title>
+                </path>
+            </a>
+
+            <a href="nucleo.html">
+                <circle class="organelle" cx="250" cy="250" r="65" fill="#4338ca" stroke="#6366f1" stroke-width="4">
+                    <title>Núcleo Celular</title>
+                </circle>
+            </a>
+            <a href="nucleolo.html">
+                <circle class="organelle" cx="250" cy="250" r="25" fill="#1e1b4b">
+                    <title>Nucleolo</title>
+                </circle>
+            </a>
+
+            <a href="golgi.html">
+                <g class="organelle" fill="none" stroke="#fb923c" stroke-width="10" stroke-linecap="round">
+                    <path d="M350,300 Q400,280 420,330" />
+                    <path d="M365,325 Q410,310 430,355" />
+                    <path d="M380,350 Q420,340 440,380" />
+                    <title>Aparato de Golgi</title>
+                </g>
+            </a>
+
+            <a href="mitocondria.html">
+                <g class="organelle">
+                    <ellipse cx="110" cy="330" rx="35" ry="18" fill="#ef4444" transform="rotate(-20 110 330)" />
+                    <path d="M90,330 Q11

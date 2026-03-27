@@ -1,0 +1,88 @@
+/* --- ESTILO OSCURO Y ATMÓSFERA --- */
+:root {
+    --bg-dark: #010103; /* Negro absoluto */
+    --horizon-orange: #ff5e00; /* Naranja intenso del plasma */
+    --horizon-yellow: #fff200; /* Amarillo brillante */
+    --shadow-black: #000;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-dark);
+    color: white;
+    font-family: 'Orbitron', sans-serif; /* Tipografía futurista sugerida */
+    overflow: hidden;
+}
+
+/* Contenedor Principal 3D */
+.world-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    perspective: 1500px; /* Profundidad aumentada */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 1. EFECTO AGUJERO NEGRO (Fondo Dinámico) */
+.black-hole-background {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    overflow: hidden;
+}
+
+/* Disco de Acreción (El contorno de plasma) */
+.accretion-disk {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotateX(60deg); /* Inclinación 3D */
+    width: 80vmax;
+    height: 80vmax;
+    border-radius: 50%;
+    background: radial-gradient(circle, transparent 40%, var(--horizon-orange) 50%, var(--horizon-yellow) 60%, transparent 70%);
+    filter: blur(20px) contrast(150%);
+    animation: plasmaPulse 10s ease-in-out infinite alternate;
+}
+
+/* Sombra Gravitacional (El centro negro) */
+.gravitational-shadow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30vmax;
+    height: 30vmax;
+    border-radius: 50%;
+    background-color: var(--shadow-black);
+    box-shadow: 0 0 50px 20px var(--shadow-black);
+    z-index: 2;
+}
+
+/* --- TÍTULO EDITABLE --- */
+.editable-title {
+    position: absolute;
+    top: 10vh;
+    z-index: 100;
+    font-size: 3.5rem;
+    text-transform: uppercase;
+    letter-spacing: 15px;
+    color: var(--horizon-yellow);
+    text-shadow: 0 0 20px var(--horizon-orange);
+    outline: none;
+    cursor: text;
+    text-align: center;
+    width: 100%;
+}
+
+/* --- ANIMACIONES --- */
+@keyframes plasmaPulse {
+    0% { transform: translate(-50%, -50%) rotateX(60deg) scale(1); filter: blur(20px) contrast(150%); }
+    100% { transform: translate(-50%, -50%) rotateX(60deg) scale(1.1); filter: blur(30px) contrast(180%); }
+}

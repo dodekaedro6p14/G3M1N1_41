@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Cuántico - Inmersión Automática</title>
+    <style>
+        /* --- CONFIGURACIÓN DE ESCENA --- */
+        :root {
+            --bg-dark: #010103;
+            --accent-gold: #c5a059;
+            --glow-effect: rgba(0, 210, 255, 0.3);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+        }
+
+        .world-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            perspective: 1500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 1. FONDO ESPIRAL: Rotación suave constante */
+        .background-spiral {
+            position: absolute;
+            width: 30vmax;
+            height: 30vmax;
+            background: url('fondo.png') no-repeat center center;
+            background-size: cover;
+            z-index: 1;
+            opacity: 0.5;
+            animation: rotateSpiral 20s linear infinite;
+        }
+
+        /* 2. PORTAL: Desplazamiento vertical muy leve para dar vida */
+        .portal-frame {
+            position: absolute;
+            width: 100%;
+            max-width: 3000px;
+            z-index: 10;
+            filter: drop-shadow(0 0 30px rgba(0,0,0,0.9));
+            animation: portalFloat 8s ease-in-out infinite;
+        }
+
+        /* 3. LADRILLO ÚNICO: Flotabilidad Cuántica Independiente */
+        .steps-container {
+            position: absolute;
+            bottom: 15%;
+            z-index: 15;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform-style: preserve-3d;
+        }
+
+        .step {
+            display: block;
+            margin-top: -65px;
+            filter: brightness(0.9) contrast(1.1);
+            /* Sombra proyectada para realismo 3D */
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5); 
+        }
+
+        /* --- TÍTULO EDITABLE --- */
+        .editable-title {
+            position: absolute;
+            top: 8%;
+            z-index: 100;
+            font-size: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 12px;
+            color: var(--accent-gold);
+            text-shadow: 0 0 20px rgba(197, 160, 89, 0.4);
+            text-align: center;
+            outline: none;
+        }
+
+        /* --- ANIMACIONES AUTOMÁTICAS --- */
+        @keyframes rotateSpiral {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes portalFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Animación de flotabilidad para el ladrillo */
+        @keyframes quantumFloat {
+            0%, 100% { 
+                transform: translateY(0) rotateX(15deg) rotateY(0deg); 
+            }
+            50% { 
+                transform: translateY(-25px) rotateX(18deg) rotateY(2deg); 
+            }
+        }
+
+        .floating-step {
+            animation: quantumFloat 6s ease-in-out infinite;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="world-container">
+        <h1 class="editable-title" contenteditable="true">PORTAL DEL DRAGÓN</h1>
+
+        <div class="background-spiral"></div>
+
+        <img src="portal_v1.png" alt="Portal" class="portal-frame">
+
+        <div class="steps-container">
+            <img src="ladrillo_fila.png" class="step floating-step" style="width: 50px; animation-delay: 1.5s;">
+            <img src="ladrillo_fila.png" class="step floating-step" style="width: 190px; animation-delay: 1.5s;"> <!-- 320-->
+            <img src="ladrillo_fila.png" class="step floating-step" style="width: 500px; animation-delay: 1.5s;">    <!-- 240   3s-->
+        </div>
+    </div>
+
+    <script>
+        // El script se ha reducido al mínimo ya que no hay interacción.
+        // Solo mantenemos un log de sistema para confirmar que el motor está en marcha.
+        console.log("%c Motor de Flotabilidad Cuántica: Activo ", "color: #c5a059; font-weight: bold;");
+    </script>
+</body>
+</html>

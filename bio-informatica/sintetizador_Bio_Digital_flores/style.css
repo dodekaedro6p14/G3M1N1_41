@@ -1,0 +1,77 @@
+  :root {
+    --primary: #2c3e50; --secondary: #818cf8; --accent: #e74c3c;
+    --bg-color: #0f172a; --energy-color: #f9e231;
+    --flower-color: var(--secondary);
+    --zoom: 1; /* Variable controlada por JS */
+    --rotation-y: 0deg; /* Variable controlada por JS */
+}
+
+body { background: var(--bg-color); color: white; font-family: sans-serif; }
+
+.main-layout { display: flex; gap: 20px; padding: 20px; }
+
+/* ESCENARIO 3D */
+.viewport {
+    perspective: 1000px; /* Profundidad de campo */
+    background: #000;
+    width: 500px; height: 500px;
+    border-radius: 15px;
+    display: flex; align-items: center; justify-content: center;
+}
+
+.flower-3d {
+    position: relative;
+    width: 100px; height: 100px;
+    transform-style: preserve-3d;
+    transform: scale(var(--zoom)) rotateY(var(--rotation-y));
+    transition: transform 0.1s linear;
+}
+
+/* Partes de la Flor */
+.stem {
+    position: absolute; width: 6px; height: 150px;
+    background: linear-gradient(to bottom, #2d5a27, #1a3317);
+    left: 47px; top: 50px;
+}
+
+.center-bulb {
+    position: absolute; width: 40px; height: 40px;
+    background: var(--energy-color);
+    border-radius: 50%; transform: translateZ(10px);
+}
+
+.petal {
+    position: absolute; width: 60px; height: 80px;
+    background: var(--flower-color);
+    border-radius: 50% 50% 0 0;
+    opacity: 0.9;
+    top: -40px; left: 20px;
+    transform-origin: bottom center;
+}
+
+/* Tallo Cilíndrico */
+.stem-3d {
+    position: absolute; width: 10px; height: 150px;
+    left: 45px; top: 20px;
+    transform-style: preserve-3d;
+}
+.s-face {
+    position: absolute; width: 10px; height: 100%;
+    background: linear-gradient(to bottom, #2d5a27, #1a3317);
+    border: 0.5px solid rgba(0,0,0,0.2);
+}
+.f1 { transform: rotateY(0deg) translateZ(5px); }
+.f2 { transform: rotateY(90deg) translateZ(5px); }
+.f3 { transform: rotateY(180deg) translateZ(5px); }
+.f4 { transform: rotateY(270deg) translateZ(5px); }
+
+/* Flor 3D actualizada */
+.flower-3d {
+    transform: scale(var(--zoom)) rotateX(var(--rotation-x)) rotateY(var(--rotation-y));
+}
+
+/* Posicionamiento Espacial de Pétalos */
+.p1 { transform: rotateY(0deg) rotateX(-20deg); }
+.p2 { transform: rotateY(90deg) rotateX(-20deg); }
+.p3 { transform: rotateY(180deg) rotateX(-20deg); }
+.p4 { transform: rotateY(270deg) rotateX(-20deg); }

@@ -1,0 +1,13 @@
+¿Cómo editar tus carpetas?
+Para no entregarte un archivo con cientos de líneas repetidas, 
+usé un pequeño script de JavaScript (en la sección 1. GENERACIÓN DE LOS 54 ENLACES).
+
+Si quieres personalizar enlaces específicos, puedes borrar ese pequeño bucle for 
+y escribir directamente dentro de cada <div class="face front"></div> el siguiente 
+formato, copiándolo 9 veces por cara:
+
+HTML
+<a href="https://tu-pagina-web.com" target="_blank" class="enlace-carpeta">
+    <span class="icono">🌍</span>
+    <span>Mi Mundo</span>
+</a>           

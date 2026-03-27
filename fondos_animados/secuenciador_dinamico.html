@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bio-Genetics: ADN Dynamic Background</title>
+    <style>
+        /* ESTILOS ESTÁNDAR DEFINIDOS POR EL USUARIO */
+        :root {
+            --primary: #2c3e50;
+            --secondary: #818cf8;
+            --accent: #e74c3c;
+            --bg-color: #0f172a;
+            --text-color: #c9d1d9;
+            --white: #ffffff;
+            --black: #1e293b;
+            --color-fuente: #fff;
+            --card-bg: #161b22;
+            --accent-color: #58a6ff;
+            --energy-color: #f9e231;
+            --border-color: #30363d;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        #dna-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* Capa de interfaz */
+        .content-overlay {
+            position: relative;
+            z-index: 10;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            text-align: center;
+            color: var(--color-fuente);
+        }
+
+        .lab-card {
+            background: rgba(22, 27, 34, 0.7);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(8px);
+            max-width: 500px;
+        }
+
+        h1 {
+            color: var(--accent-color);
+            margin: 0;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        p { opacity: 0.8; font-size: 0.9rem; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+    <canvas id="dna-canvas"></canvas>
+
+    <div class="content-overlay">
+        <div class="lab-card">
+            <h1>Secuenciador Dinámico</h1>
+            <p>Las partículas representan nucleótidos que se auto-organizan en estructuras helicoidales, se separan en el fluido celular y convergen en una cadena maestra.</p>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * MOTOR DE ADN DINÁMICO
+         * Programado por tu Prima Experta en Python/JS
+         */
+        const canvas = document.getElementById('dna-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let time = 0;
+        
+        // ESTADOS: 0 = Cadenas múltiples, 1 = Natación libre, 2 = Cadena única
+        let currentState = 0;
+        let stateTimer = 0;
+
+        const config = {
+            count: 300, // Número de partículas (nucleótidos)
+            speed: 0.02,
+            dnaAmplitude: 60,
+            dnaFrequency: 0.01
+        };
+
+        function init() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = [];
+            for (let i = 0; i < config.count; i++) {
+                particles.push(new Nucleotide(i));
+            }
+        }
+
+        class Nucleotide {
+            constructor(id) {
+                this.id = id;
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                // Color alternado entre los acentos definidos
+                this.color = this.id % 2 === 0 ? 'var(--accent-color)' : 'var(--secondary)';
+                this.size = Math.random() * 2 + 1.5;
+            }
+
+            update() {
+                let targetX, targetY;
+
+                if (currentState === 0) {
+                    // MODO: CADENAS MÚLTIPLES (Cadenas pequeñas nadando)
+                    let strand = this.id % 2 === 0 ? 1 : -1;
+                    let group = Math.floor(this.id / 100); // 3 grupos
+                    let offsetX = (canvas.width / 4) * (group + 1);
+                    
+                    targetX = offsetX + Math.sin(time * 0.5 + this.y * config.dnaFrequency) * config.dnaAmplitude * strand;
+                    targetY = this.y + Math.sin(time + this.id);
+                    
+                    // Suavizado de movimiento hacia la estructura
+                    this.x += (targetX - this.x) * 0.05;
+                    this.y += this.vy;
+                } 
+                else if (currentState === 1) {
+                    // MODO: NATACIÓN LIBRE
+                    this.x += this.vx;
+                    this.y += this.vy;
+                } 
+                else if (currentState === 2) {
+                    // MODO: CADENA ÚNICA MAESTRA (Centro)
+                    let strand = this.id % 2 === 0 ? 1 : -1;
+                    targetX = (canvas.width / 2) + Math.sin(time + this.y * 0.005) * (config.dnaAmplitude * 1.5) * strand;
+                    
+                    this.x += (targetX - this.x) * 0.05;
+                    this.y += this.vy;
+                }
+
+                // Envoltura de pantalla (Scroll infinito)
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(this.color.trim().replace('var(', '').replace(')', ''));
+                
+                // Efecto de brillo
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = ctx.fillStyle;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        // Dibuja los enlaces (puentes de hidrógeno) entre nucleótidos cercanos
+        function drawBonds() {
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    let dx = particles[i].x - particles[j].x;
+                    let dy = particles[i].y - particles[j].y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+
+                    // Solo conectamos si están muy cerca (simula el par de bases)
+                    if (dist < 50 && ((particles[i].id % 2 === 0 && particles[j].id === particles[i].id + 1) || currentState === 1)) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${1 - dist / 50})`;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            // Fondo con rastro sutil para efecto de movimiento (motion blur)
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.2)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            time += 0.02;
+            stateTimer++;
+
+            // Cambio de estado cada 8 segundos (aprox 480 frames)
+            if (stateTimer > 480) {
+                currentState = (currentState + 1) % 3;
+                stateTimer = 0;
+            }
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            drawBonds();
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', init);
+        init();
+        animate();
+
+    </script>
+</body>
+</html>
