@@ -4,7 +4,7 @@
 
 // --- A. FUNCIÓN DE PROYECCIÓN 3D A 2D ---
 // Ahora recibe las medidas y ángulos directamente del estado
-function proyectar(p3d, width, height, angleX, angleY, zoom) {
+function proyectar(p3d, width, height, angleX, angleY, angleZ, zoom) {
     let x = p3d[0], y = p3d[1], z = p3d[2];
 
     // Rotación Eje X
@@ -18,6 +18,12 @@ function proyectar(p3d, width, height, angleX, angleY, zoom) {
     let x1 = x * cosY + z * sinY;
     let z2 = -x * sinY + z * cosY;
     x = x1; z = z2;
+
+    // --- NUEVA: ROTACIÓN EJE Z ---
+    let cosZ = Math.cos(angleZ), sinZ = Math.sin(angleZ);
+    let x2 = x * cosZ - y * sinZ;
+    let y2 = x * sinZ + y * cosZ;
+    x = x2; y = y2;
 
     // Perspectiva y Zoom
     let fov = 300;
@@ -144,7 +150,7 @@ function dibujarPoligono(ctx, proyectarFn, indices, color = "rgba(0, 251, 255, 1
 
 
 // --- F. NUEVA FUNCIÓN: POLÍGONO CON BORDES CURVOS (PÉTALOS) ---
-function dibujarPoligonoCurvo(ctx, proyectarFn, indices, color = "rgba(255, 0, 110, 0.3)", altura = 50) {
+function dibujarPoligonoCurvo(ctx, proyectarFn, indices, color = "rgba(255, 0, 110, 0.3)", altura = 50, puntosAUsar = puntos) {
     if (!indices || indices.length < 3) return; // Necesita al menos 3 puntos
 
     ctx.beginPath();
@@ -157,9 +163,9 @@ function dibujarPoligonoCurvo(ctx, proyectarFn, indices, color = "rgba(255, 0, 1
 
     // Recorremos cada punto para conectarlo con el siguiente
     for (let k = 0; k < indices.length; k++) {
-        let pA = puntos[indices[k]];
+        let pA = puntosAUsar[indices[k]];
         // El siguiente punto (si es el último, vuelve al primero para cerrar la figura)
-        let pB = puntos[indices[(k + 1) % indices.length]]; 
+        let pB = puntosAUsar[indices[(k + 1) % indices.length]]; 
         
         if (!pA || !pB) continue;
 

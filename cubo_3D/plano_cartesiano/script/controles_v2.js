@@ -12,13 +12,21 @@ function configurarControles(estado) {
         if (key === 's') estado.angleX -= 0.1;
 
         if (key === 'r') {
-            estado.angleX = 0; 
-            estado.angleY = 0; 
-            estado.zoom = 1; 
+            estado.angleX = 0;
+            estado.angleY = 0;
+            estado.angleZ = 0;
+            estado.zoom = 1;
             estado.animacionActiva = false;
         }
         if (key === 'p') {
             estado.animacionActiva = !estado.animacionActiva;
+        }
+        if (key === 'l') {
+             estado.animacionZ_puntos_activa = !estado.animacionZ_puntos_activa;
+        }
+        if (key === 'k') {
+            estado.animacionX = !estado.animacionX;
+             console.log("Animación Eje X:", estado.animacionZ ? "ON" : "OFF"); 
         }
         if (key === 'v') {
             estado.mostrarIndices = !estado.mostrarIndices;

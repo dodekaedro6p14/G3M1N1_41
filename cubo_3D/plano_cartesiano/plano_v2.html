@@ -106,9 +106,9 @@
             if (typeof puntos !== 'undefined') {
                 puntos.forEach((p3d, i) => {
                     const p = proj(p3d);
-                    ctx.fillStyle = (i === 18) ? "#ffffff" : "#ff006e";
+                    ctx.fillStyle = (i === 0) ? "#ffffff" : "#ff006e";
                     ctx.beginPath();
-                    ctx.arc(p.x, p.y, (i === 18) ? 2 : 1.5, 0, Math.PI * 2);
+                    ctx.arc(p.x, p.y, (i === 0) ? 2 : 1.5, 0, Math.PI * 2);
                     ctx.fill();
 
                     if (estado.mostrarIndices) {
