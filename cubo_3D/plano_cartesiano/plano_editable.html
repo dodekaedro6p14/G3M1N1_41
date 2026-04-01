@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ED174BL3 - Fruta Edition</title>
+    <link rel="stylesheet" href="styles_geo.css">
+</head>
+
+<body>
+
+    <div id="background-guide"></div>
+
+    <div id="panel-info">
+        <h2 style="margin:0; text-shadow: 0 0 5px #00fbff;">EDITOR_pl4N0</h2>
+        <p style="font-size: 11px; color: cyan; margin-bottom: 5px;">
+            EJES: <span style="color:#ff4d4d">X(A-D)</span> |
+            <span style="color:#4dff4d">Y(W-S)</span> |
+            <span style="color:#4d4dff">Z(Q-E zoom)</span><br>
+            <span style="color: #ff4dd2">P: Giro Automático</span><br>
+            <span style="color: #ffff00">V: Ocultar/Mostrar Números</span><br>
+            R: Resetear Multiverso
+        </p>
+    </div>
+
+    <canvas id="canvas"></canvas>
+    <script src="datos_tetraedro.js"></script> <!-- Escoge el diseño para visualizar o editar-->
+    <script src="motor_grafico.js"></script>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- 1. VARIABLES PRINCIPALES ---
+        let width, height;
+        let angleX = 0, angleY = 0, zoom = 1.0;
+
+        // --- 2. VARIABLES DE CONTROLES ---
+        let animacionActiva = false;
+        let ejeGiro = 'Y';        // El eje en el que rota automáticamente
+        let velocidadGiro = 0.01; // Velocidad del auto-giro
+        let mostrarIndices = true;// Controla si se ven los números
+
+        // --- F. MOTOR PRINCIPAL DE ANIMACIÓN ---
+        function loop() {
+            // A) Lógica de giro perpetuo automático
+            if (animacionActiva) {
+                if (ejeGiro === 'X') angleX += velocidadGiro;
+                if (ejeGiro === 'Y') angleY += velocidadGiro;
+                if (ejeGiro === 'Z') angleY += velocidadGiro;
+            }
+
+            // B) Limpiar el lienzo
+            ctx.clearRect(0, 0, width, height);
+
+            // C) Dibujar todas las curvas de nuestra lista automáticamente
+            conexiones_curvas.forEach(par => {
+                dibujarCurvaAutomatica(par[0], par[1], "#00fbff", 30);
+            });
+            // Dibujamos los polígonos
+            misPoligonos.forEach(poli => {
+                dibujarPoligono(poli.puntos, poli.color);
+            });
+            // 1. Justo antes de dibujar los puntos, verificamos si mostrar los índices/guías
+            if (mostrarIndices) {
+                dibujarEjes(); // Llamamos a la nueva función aquí
+            }
+            // D) Proyectar y dibujar puntos / índices
+            let pProyectados = puntos.map(p => proyectar(p));
+
+            // ==========================================
+            // MALLA PRINCIPAL (Líneas Originales)
+            // ==========================================
+            // Lineas que forman el CUBO
+            ctx.strokeStyle = "rgba(255, 0, 0, 1.0)";
+            conexiones.forEach(c => {
+                if (pProyectados[c[0]] && pProyectados[c[1]]) {
+                    const p1 = pProyectados[c[0]];
+                    const p2 = pProyectados[c[1]];
+                    ctx.beginPath();
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.stroke();
+                }
+            });
+
+            // ==========================================
+            // MAGIA 3: SISTEMA DE ESFERAS MODULAR
+            // ==========================================
+            // --- Inyectar dentro del loop, después de calcular pProyectados ---
+            if (puntos_esfera) {
+                puntos_esfera.forEach(indice => {
+                    let p = pProyectados[indice];
+                    if (p) {
+                        // Tamaño base 15, ajustado por la perspectiva (Z)
+                        let escalaPerspectiva = 300 / (p.z + 200);
+                        let radioNatural = 15 * escalaPerspectiva * zoom;
+
+                        // Usamos un color más neutro, como un azul acero o gris claro
+                        dibujarEsferaSencilla(p, radioNatural, "#ff0000");
+                    }
+                });
+            };
+
+            // fin escript persona
+            pProyectados.forEach((p, i) => {
+                // El puntito gráfico
+                ctx.fillStyle = (i === 18) ? "#ffffff" : "#ff006e";
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, (i === 18) ? 2 : 1.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // El número/texto flotante
+                if (mostrarIndices) {
+                    ctx.fillStyle = "#fff";
+                    ctx.font = "9px Courier New";
+                    if (i === 18) {
+                        ctx.fillText(`NÚCLEO`, p.x + 12, p.y - 12);
+                    } else {
+                        ctx.fillText(i, p.x + 8, p.y - 8);
+                    }
+                }
+            });
+
+            // E) Repetir indefinidamente el ciclo
+            requestAnimationFrame(loop);
+        }
+
+        // --- 8. CONTROLES DE MOUSE ---
+        let drag = false, lastX, lastY;
+        canvas.onmousedown = (e) => { drag = true; lastX = e.clientX; lastY = e.clientY; };
+        window.onmouseup = () => drag = false;
+        window.onmousemove = (e) => {
+            if (!drag) return;
+            angleY += (e.clientX - lastX) * 0.01;
+            angleX += (e.clientY - lastY) * 0.01;
+            lastX = e.clientX; lastY = e.clientY;
+        };
+
+        // --- 9. CONTROLES DE TECLADO ---
+        window.onkeydown = (e) => {
+            const key = e.key.toLowerCase();
+
+            if (key === 'q') zoom += 0.1;
+             if (key === 'e') zoom = Math.max(0.1, zoom - 0.1);
+            if (key === 'a') angleY -= 0.1;
+            if (key === 'd') angleY += 0.1;
+            if (key === 'w') angleX += 0.1;
+            if (key === 's') angleX -= 0.1;
+
+            if (key === 'r') {
+                angleX = 0; angleY = 0; zoom = 1; animacionActiva = false;
+            }
+            if (key === 'p') {
+                animacionActiva = !animacionActiva;
+            }
+            if (key === 'v') {
+                mostrarIndices = !mostrarIndices;
+            }
+        };
+
+        // --- 10. INICIAR EL MUNDO ---
+        function redimensionar() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+        window.onresize = redimensionar;
+        redimensionar();
+
+        // El primer empujón para arrancar el programa
+        loop();
+
+    </script>
+</body>
+
+</html>

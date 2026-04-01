@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Fruta Edition</title>
+    <link rel="stylesheet" href="styles_geo.css">
+</head>
+
+<body>
+
+    <div id="background-guide"></div>
+
+    <div id="panel-info">
+        <h2 style="margin:0; text-shadow: 0 0 5px #00fbff;">EDITOR_pl4N0</h2>
+        <p style="font-size: 15px; color: cyan; margin-bottom: 5px;">
+            EJES: <span style="color:#ff4d4d">X(A-D)</span> |
+            <span style="color:#4dff4d">Y(W-S)</span> |
+            <span style="color:#4d4dff">Z(Q-E zoom)</span><br>
+            <span style="color: #ff4dd2">P: Giro Automático</span><br>
+            <span style="color: #ffff00">V: Ocultar/Mostrar Números</span><br>
+            R: Resetear Multiverso
+        </p>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- 1. VARIABLES PRINCIPALES ---
+        let width, height;
+        let angleX = 0, angleY = 0, zoom = 1.0;
+
+        // --- 2. VARIABLES DE CONTROLES NUEVOS ---
+        let animacionActiva = false;
+        let ejeGiro = 'Y';        // El eje en el que rota automáticamente
+        let velocidadGiro = 0.01; // Velocidad del auto-giro
+        let mostrarIndices = true;// Controla si se ven los números
+
+        // --- 3. LISTA DE CONEXIONES CURVAS ---
+        // Agrega aquí los pares de puntos que quieres unir
+        const conexiones_curvas = [
+            [4, 0],
+            [5, 8],
+            [6, 7]
+        ];
+        // conexiones lineas ---
+        const conexiones = [
+            [1, 2], [2, 3], [3, 4], [4, 1], // cubo base
+            [5, 6], [6, 4], [5, 1], [8, 5], [8, 2], [7, 3], [7, 8], [7, 6],
+            [15, 16], [17, 14], [14, 16], [15, 17], // tetraedro
+            [15, 13], [14, 13], [13, 16], [13, 17]
+        ];
+
+        // --- 4. TUS PUNTOS 3D ---
+        // ⚠️ ¡IMPORTANTE! Reemplaza este array con tus puntos reales. 
+        // He dejado estos de ejemplo para que el canvas no falle y veas algo en pantalla.
+        const puntos = [
+        //      
+            [-50, -50, -50],
+            [50, -50, -50],
+            [50, 50, -50],
+            [-50, 50, -50],
+            [-50, -50, 50], [50, -50, 50], [50, 50, 50], [-50, 50, 50],
+            [0, -80, 0], [0, 80, 0], [-80, 0, 0], [80, 0, 0],
+            [0, 0, -100], // punto 12p
+            [0, -100, 100],
+            [-30, -30, -30], [30, 30, 30],
+            [-30, 30, 30], [30, -30, -30],
+            [0, 0, 0] // 18: El núcleo
+        ];
+        // Elige los índices de los puntos donde quieres ver una esfera
+        const puntos_con_esfera = [10, 9, 11];
+        // Dibujar esferas
+        function dibujarEsferaSencilla(p2d, radio = 20, colorBase = "#ff0000", opacidad) {
+            ctx.beginPath();
+
+            // Creamos un degradado muy sutil solo para dar algo de profundidad natural
+            let grd = ctx.createRadialGradient(
+                p2d.x, p2d.y, radio * 0.2,
+                p2d.x, p2d.y, radio
+            );
+            grd.addColorStop(0, colorBase); // Color real en el centro
+            grd.addColorStop(1, "#1a1a1a"); // Oscurece ligeramente en los bordes
+
+            ctx.fillStyle = colorBase;
+            ctx.globalAlpha = opacidad;
+            ctx.beginPath();
+            ctx.arc(p2d.x, p2d.y, radio, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 0.5;
+            ctx.closePath();
+            /*   ctx.fillStyle = grd;
+              ctx.arc(p2d.x, p2d.y, radio, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.closePath(); */
+        }
+
+        // --- 5. FUNCIÓN DE PROYECCIÓN 3D A 2D ---
+        function proyectar(p3d) {
+            let x = p3d[0], y = p3d[1], z = p3d[2];
+
+            // Rotación Eje X
+            let cosX = Math.cos(angleX), sinX = Math.sin(angleX);
+            let y1 = y * cosX - z * sinX;
+            let z1 = y * sinX + z * cosX;
+            y = y1; z = z1;
+
+            // Rotación Eje Y
+            let cosY = Math.cos(angleY), sinY = Math.sin(angleY);
+            let x1 = x * cosY + z * sinY;
+            let z2 = -x * sinY + z * cosY;
+            x = x1; z = z2;
+
+            // Perspectiva y Zoom
+            let fov = 300;
+            let zPerspective = z + 200;
+            let scale = (fov / (zPerspective || 1)) * zoom;
+
+            return {
+                x: width / 2 + x * scale,
+                y: height / 2 + y * scale,
+                z: z
+            };
+        }
+        // dibujar ejes
+        function dibujarEjes() {
+            const limite = 200; // El eje irá de -200 a 200
+
+            // Definimos puntos de inicio (A) y fin (B) para cada dimensión
+            const ejeX = { a: [-limite, 0, 0], b: [limite, 0, 0], col: "#ff4d4d", label: "X" };
+            const ejeY = { a: [0, -limite, 0], b: [0, limite, 0], col: "#4dff4d", label: "Y" };
+            const ejeZ = { a: [0, 0, -limite], b: [0, 0, limite], col: "#4d4dff", label: "Z" };
+
+            const ejes = [ejeX, ejeY, ejeZ];
+
+            ctx.lineWidth = 1; // Un poco más fino para que no estorbe la vista
+
+            ejes.forEach(eje => {
+                // Proyectamos ambos extremos del eje
+                const pA = proyectar(eje.a);
+                const pB = proyectar(eje.b);
+
+                // Dibujar la línea que atraviesa el plano
+                ctx.strokeStyle = eje.col;
+                ctx.beginPath();
+                ctx.moveTo(pA.x, pA.y);
+                ctx.lineTo(pB.x, pB.y);
+                ctx.stroke();
+
+                // Dibujar la letra en el extremo positivo
+                ctx.fillStyle = eje.col;
+                ctx.font = "bold 12px Arial";
+                ctx.fillText(eje.label, pB.x + 5, pB.y + 5);
+            });
+        }
+
+        // --- 6. FUNCIÓN FÁBRICA DE CURVAS INTELIGENTES ---
+        function dibujarCurvaAutomatica(indiceA, indiceB, color = "#ff006e", altura = 50) {
+            let pA = puntos[indiceA];
+            let pB = puntos[indiceB];
+            if (!pA || !pB) return; // Si el punto no existe, sale sin dar error
+
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+
+            const segmentos = 25;
+
+            // Calcula hacia dónde es "afuera"
+            let medioX = (pA[0] + pB[0]) / 2;
+            let medioY = (pA[1] + pB[1]) / 2;
+            let medioZ = (pA[2] + pB[2]) / 2;
+
+            let mag = Math.sqrt(medioX ** 2 + medioY ** 2 + medioZ ** 2);
+            let dirX = mag === 0 ? 0 : medioX / mag;
+            let dirY = mag === 0 ? 1 : medioY / mag;
+            let dirZ = mag === 0 ? 0 : medioZ / mag;
+
+            for (let i = 0; i <= segmentos; i++) {
+                let t = i / segmentos;
+
+                let x = pA[0] + (pB[0] - pA[0]) * t;
+                let y = pA[1] + (pB[1] - pA[1]) * t;
+                let z = pA[2] + (pB[2] - pA[2]) * t;
+
+                let arco = Math.sin(t * Math.PI) * altura;
+
+                let puntoCurvo = proyectar([
+                    x + (dirX * arco),
+                    y + (dirY * arco),
+                    z + (dirZ * arco)
+                ]);
+
+                if (i === 0) ctx.moveTo(puntoCurvo.x, puntoCurvo.y);
+                else ctx.lineTo(puntoCurvo.x, puntoCurvo.y);
+            }
+            ctx.stroke();
+        }
+
+        // --- 7. MOTOR PRINCIPAL DE ANIMACIÓN ---
+        function loop() {
+            // A) Lógica de giro perpetuo automático
+            if (animacionActiva) {
+                if (ejeGiro === 'X') angleX += velocidadGiro;
+                if (ejeGiro === 'Y') angleY += velocidadGiro;
+                if (ejeGiro === 'Z') angleY += velocidadGiro;
+            }
+
+            // B) Limpiar el lienzo
+            ctx.clearRect(0, 0, width, height);
+
+            // C) Dibujar todas las curvas de nuestra lista automáticamente
+            conexiones_curvas.forEach(par => {
+                dibujarCurvaAutomatica(par[0], par[1], "#00fbff", 40);
+            });
+
+            // D) Justo antes de dibujar los puntos, verificamos si mostrar los índices/guías
+            if (mostrarIndices) {
+                dibujarEjes(); // Llamamos a la nueva función aquí
+            }
+
+
+            // E) Proyectar y dibujar puntos / índices
+            let pProyectados = puntos.map(p => proyectar(p));
+
+            pProyectados.forEach((p, i) => {
+                // El puntito gráfico
+                ctx.fillStyle = (i === 18) ? "#ffffff" : "#ff006e";
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, (i === 18) ? 2 : 1.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // El número/texto flotante
+                if (mostrarIndices) {
+                    ctx.fillStyle = "#fff";
+                    ctx.font = "9px Courier New";
+                    if (i === 18) {
+                        ctx.fillText(`NÚCLEO`, p.x + 12, p.y - 12);
+                    } else {
+                        ctx.fillText(i, p.x + 8, p.y - 8);
+                    }
+                }
+            });
+            // ==========================================
+            // MALLA PRINCIPAL (Líneas Originales)
+            // ==========================================
+            //  F) Lineas que forman el CUBO
+            ctx.strokeStyle = "rgba(255, 0, 0, 1.0)";
+            conexiones.forEach(c => {
+                if (pProyectados[c[0]] && pProyectados[c[1]]) {
+                    const p1 = pProyectados[c[0]];
+                    const p2 = pProyectados[c[1]];
+                    ctx.beginPath();
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.stroke();
+                }
+            });
+            //  G) --- Inyectar esferas ---
+            if (puntos_con_esfera) {
+                puntos_con_esfera.forEach(indice => {
+                    let p = pProyectados[indice];
+                    if (p) {
+                        // Tamaño base 15, ajustado por la perspectiva (Z)
+                        let escalaPerspectiva = 300 / (p.z + 200);
+                        let radioNatural = 15 * escalaPerspectiva * zoom;
+
+                        // Usamos un color más neutro, como un azul acero o gris claro
+                        dibujarEsferaSencilla(p, radioNatural, "#ff0000"); //color de las esferas
+                    }
+                });
+            }
+
+
+            // E) Repetir indefinidamente el ciclo
+            requestAnimationFrame(loop);
+        }
+
+        // --- 8. CONTROLES DE MOUSE ---
+        let drag = false, lastX, lastY;
+        canvas.onmousedown = (e) => { drag = true; lastX = e.clientX; lastY = e.clientY; };
+        window.onmouseup = () => drag = false;
+        window.onmousemove = (e) => {
+            if (!drag) return;
+            angleY += (e.clientX - lastX) * 0.01;
+            angleX += (e.clientY - lastY) * 0.01;
+            lastX = e.clientX; lastY = e.clientY;
+        };
+
+        // --- 9. CONTROLES DE TECLADO ---
+        window.onkeydown = (e) => {
+            const key = e.key.toLowerCase();
+
+            if (key === 'q') zoom += 0.1;
+            if (key === 'e') zoom = Math.max(0.1, zoom - 0.1);
+            if (key === 'a') angleY -= 0.1;
+            if (key === 'd') angleY += 0.1;
+            if (key === 'w') angleX += 0.1;
+            if (key === 's') angleX -= 0.1;
+
+            if (key === 'r') {
+                angleX = 0; angleY = 0; zoom = 1; animacionActiva = false;
+            }
+            if (key === 'p') {
+                animacionActiva = !animacionActiva;
+            }
+            if (key === 'v') {
+                mostrarIndices = !mostrarIndices;
+            }
+        };
+
+        // --- 10. INICIAR EL MUNDO ---
+        function redimensionar() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+        window.onresize = redimensionar;
+        redimensionar();
+
+        // El primer empujón para arrancar el programa
+        loop();
+
+    </script>
+</body>
+
+</html>

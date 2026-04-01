@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajedrez Maestro - Motor Estratégico</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>Ajedrez Pro - Motor Estratégico</h1>
+
+  <!--   <div class="header-info">
+        <div id="timer-w" class="timer">Blancas: 10:00</div>
+        <div id="status-box">TURNO BLANCAS</div>
+        <div id="timer-b" class="timer">IA: 10:00</div>
+    </div>
+ -->
+    <div class="game-wrapper">
+    	<div id="chess-board"></div>
+    	<div id="side-panel" class="side-panel">
+        	<h3>Historial de Jugadas</h3>
+        	<div id="move-history"></div>
+    	</div>
+    </div>
+
+    <div class="controls">
+        <p><small>Modo: Difícil / Estratégico (IA activada)</small></p>
+        <button onclick="location.reload()">Reiniciar Partida</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

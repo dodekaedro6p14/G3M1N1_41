@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="styles_geo.css">
+</head>
+
+<body>
+    <div id="background-guide"></div>
+
+    <div id="panel-info">
+        <h2 style="margin:0; text-shadow: 0 0 5px #00fbff;">EDITOR_pl4N0</h2>
+        <p style="font-size: 11px; color: cyan; margin-bottom: 5px;">
+            EJES: <span style="color:#ff4d4d">X(A-D)</span> |
+            <span style="color:#4dff4d">Y(W-S)</span> |
+            <span style="color:#4d4dff">Z(Q-E zoom)</span><br>
+            <span style="color: #ff4dd2">P: Giro Automático</span><br>
+            <span style="color: #ffff00">V: Ocultar/Mostrar Números</span><br>
+            R: Resetear Multiverso
+        </p>
+    </div>
+    <canvas id="canvas"></canvas>
+
+    <script src="./script/datos_flor.js"></script>
+    <script src="./script/m_grafico_v2.js"></script>
+    <script src="./script/controles.js"></script>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Objeto Central de Estado (Para que todos los archivos lean de aquí)
+        const estado = {
+            angleX: 0,
+            angleY: 0,
+            zoom: 1.0,
+            animacionActiva: false,
+            mostrarIndices: true,
+            velocidadGiro: 0.01
+        };
+
+        // Inicializamos los controles pasándole el objeto estado
+        configurarControles(estado);
+
+        function loop() {
+            // Lógica de rotación automática
+            if (estado.animacionActiva) {
+                estado.angleY += estado.velocidadGiro;
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Proyector simplificado usando el estado actual
+            const proj = (p) => proyectar(p, canvas.width, canvas.height, estado.angleX, estado.angleY, estado.zoom);
+
+            // 1. Dibujar ejes
+            if (estado.mostrarIndices) dibujarEjes(ctx, proj);
+
+            // 2. Dibujar polígonos
+            if (typeof misPoligonos !== 'undefined') {
+                misPoligonos.forEach(poli => dibujarPoligono(ctx, proj, poli.puntos, poli.color));
+            }
+
+            // 3. Dibujar curvas
+            if (typeof conexiones_curvas !== 'undefined') {
+                conexiones_curvas.forEach(par => dibujarCurvaAutomatica(ctx, proj, par[0], par[1]));
+            }
+
+            // 4. Dibujar MALLA PRINCIPAL (Líneas rectas) --> ¡ESTO FALTABA!
+            if (typeof conexiones !== 'undefined') {
+                ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
+                ctx.lineWidth = 1;
+                conexiones.forEach(c => {
+                    const p1 = proj(puntos[c[0]]);
+                    const p2 = proj(puntos[c[1]]);
+                    ctx.beginPath();
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.stroke();
+                });
+            }
+
+            // 5. Dibujar esferas
+            if (typeof puntos_con_esfera !== 'undefined') {
+                puntos_con_esfera.forEach(idx => {
+                    const p = proj(puntos[idx]);
+                    dibujarEsferaSencilla(ctx, p, 15 * estado.zoom, "#b0c4de");
+                });
+            }
+
+            // 6. Dibujar PUNTOS Y NÚMEROS --> ¡ESTO TAMBIÉN FALTABA!
+            if (typeof puntos !== 'undefined') {
+                puntos.forEach((p3d, i) => {
+                    const p = proj(p3d);
+                    ctx.fillStyle = (i === 18) ? "#ffffff" : "#ff006e";
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, (i === 18) ? 2 : 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    if (estado.mostrarIndices) {
+                        ctx.fillStyle = "#fff";
+                        ctx.font = "9px Courier New";
+                        if (i === 18) {
+                            ctx.fillText('', p.x + 12, p.y - 12);
+                        } else {
+                            ctx.fillText(i, p.x + 8, p.y - 8);
+                        }
+                    }
+                });
+            }
+
+            requestAnimationFrame(loop);
+        }
+
+        // Redimensionar y arrancar
+        window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+        window.onresize();
+        loop();
+    </script>
+</body>
+
+</html>

@@ -8,8 +8,11 @@
 </head>
 <body>
 
-    <div class="instrucciones">
-        <p>W,Z (X) | A,D (Y) | Q,E (Zoom) | R (Reset)</p>
+    <div class="instrucciones" style="position: absolute; float: right;">
+        <p style="color: yellow; font-size: 12;">W,Z (X) | A,D (Y) | Q,E (Zoom) | R (Reset)</p>
+         <div class="lab-card"><audio id="miAudio" controls style="float:right; height: 15px">
+                <source src="./texto_ia/relax.mp3" type="audio/mpeg">
+            </audio></div>
     </div>
 
     <div class="scene">
@@ -18,13 +21,13 @@
             <div class="face front">
                 <a href="https://www.google.com" target="_blank" class="enlace-carpeta"><span class="icono">🌐</span><span>Google</span></a>                
                 <a href="https://github.com/dodekaedro6p14" target="_blank" class="enlace-carpeta"><span class="icono">🐙</span><span>gitHub</span></a>
-                <a href="https://www.ncbi.nlm.nih.gov/" target="_blank" class="enlace-carpeta"><span class="icono">🧬</span><span>ncbi.nlm.nih.gov/</span></a>
-                <a href="./triniti/index.html" target="_blanck" class="enlace-carpeta"><span class="icono">👾</span><span>TR1N1T1</span></a>
+                <a href="#" target="_blank" class="enlace-carpeta"><span class="icono">🧬</span><span>0</span></a>
+                <a href="#" target="_blanck" class="enlace-carpeta"><span class="icono">👾</span><span>0</span></a>
                 <a href="#" class="enlace-carpeta"><span class="icono">💻</span><span>Link 5</span></a>
                 <a href="#" class="enlace-carpeta"><span class="icono">🌸</span><span>Link 6</span></a>
                 <a href="#" class="enlace-carpeta"><span class="icono">🚀</span><span>Link 7</span></a>
                 <a href="#" class="enlace-carpeta"><span class="icono">🔗</span><span>Link 8</span></a>
-                <a href="./triniti/mono/ajedrez/agedrez.html" target="_blank" class="enlace-carpeta"><span class="icono">♜</span><span>AJ3DR3Z</span></a>
+                <a href="./games/ajedrez/ajedrez.html" target="_blank" class="enlace-carpeta"><span class="icono">♜</span><span>AJ3DR3Z</span></a>
             </div>
 
             <div class="face right">
@@ -53,7 +56,7 @@
 
             <div class="face left">
                 <a href="#" class="enlace-carpeta"><span class="icono">📁</span><span>Link 28</span></a>
-                <a href="./triniti/mono/tabla_v2.html" target="_blank" class="enlace-carpeta"><span class="icono">👾</span><span>T_p3r1d0</span></a>
+                <a href="https://github.com/dodekaedro6p14/periodic_table/blob/main/tabla_v2.html" target="_blank" class="enlace-carpeta"><span class="icono">👾</span><span>T_p3r1d0</span></a>
                 <a href="#" class="enlace-carpeta"><span class="icono">🌍</span><span>Link 30</span></a>
                 <a href="#" class="enlace-carpeta"><span class="icono">🔗</span><span>Link 31</span></a>
                 <a href="#" class="enlace-carpeta"><span class="icono">🚀</span><span>Link 32</span></a>
@@ -102,8 +105,8 @@
             const key = e.key.toLowerCase();
             if(key === 'a') angleY -= 10;
             if(key === 'd') angleY += 10;
-            if(key === 'w') angleX += 10;
-            if(key === 'z') angleX -= 10;
+            if(key === 's') angleX += 10;
+            if(key === 'w') angleX -= 10;
             if(key === 'q') scale += 0.1;
             if(key === 'e') scale -= 0.1;
             if(key === 'r') { angleX = -15; angleY = -25; scale = 1; }
