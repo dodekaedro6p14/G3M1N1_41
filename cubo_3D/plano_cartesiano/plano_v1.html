@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Plano_v3</title>
+    <title>Plano_v1</title>
     <link rel="stylesheet" href="styles_geo.css">
 </head>
 
@@ -23,9 +23,9 @@
     </div>
     <canvas id="canvas"></canvas>
 
-    <script src="./script/datos_flor_v2.js"></script>
-    <script src="./script/m_grafico_v3.js"></script>
-    <script src="./script/controles.js"></script>
+    <script src="./script/datos_flor_v1.js"></script>
+    <script src="./script/m_grafico_v1.js"></script>
+    <script src="./script/controles_v1.js"></script>
 
     <script>
         const canvas = document.getElementById('canvas');
@@ -35,14 +35,8 @@
         const estado = {
             angleX: 0,
             angleY: 0,
-            angleZ: 0,
-            angleZ_puntos: 0,
             zoom: 1.0,
             animacionActiva: false,
-           /*  animacionZ: false,
-            animacionX: false, 
-            angleZ_puntos: 0,*/
-            animacionZ_puntos_activa: false,
             mostrarIndices: true,
             velocidadGiro: 0.01
         };
@@ -55,42 +49,11 @@
             if (estado.animacionActiva) {
                 estado.angleY += estado.velocidadGiro;
             }
-           /*  if (estado.animacionZ) {
-                estado.angleZ += estado.velocidadGiro;
-            }
-            if (estado.animacionX) {
-                estado.angleX += estado.velocidadGiro;
-            } */
-            if (estado.animacionZ_puntos_activa) {
-                // Esto le suma un poquito al ángulo en cada frame (es la velocidad)
-                // Puedes subir o bajar este número (ej: 0.02 o 0.1) para que lata más rápido
-                estado.angleZ_puntos = (estado.angleZ_puntos || 0) + 0.05;
-            }
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 2. CREAR PUNTOS TRANSFORMADOS
-            // En lugar de usar 'puntos' directamente, creamos una copia rotada
-            const puntosAnimados = puntos.map(p => {
-                if (estado.animacionZ) {
-                    let x = p[0];
-                    let y = p[1];
-                    let z = p[2];
-
-                    // Rotación simple en Z para cada punto
-                    let cos = Math.cos(estado.angleZ_puntos);
-                    let sin = Math.sin(estado.angleZ_puntos);
-
-                    let nx = x * cos - (y + Math.sin(estado.angleZ_puntos) * 10) * sin;
-                    let ny = x * sin + (y + Math.sin(estado.angleZ_puntos) * 10) * cos;
-
-                    return [nx, ny, z];
-                }
-                return p; // Si la animación está apagada, devolvemos el punto original
-            });
-
             // Proyector simplificado usando el estado actual
-            const proj = (p) => proyectar(p, canvas.width, canvas.height, estado.angleX, estado.angleY, estado.angleZ, estado.zoom);
+            const proj = (p) => proyectar(p, canvas.width, canvas.height, estado.angleX, estado.angleY, estado.zoom);
 
             // 1. Dibujar ejes
             if (estado.mostrarIndices) dibujarEjes(ctx, proj);
@@ -104,17 +67,20 @@
             if (typeof conexiones_curvas !== 'undefined') {
                 conexiones_curvas.forEach(par => dibujarCurvaAutomatica(ctx, proj, par[0], par[1]));
             }
+            // --- DENTRO DEL loop() ---
+
             // 3.5 Dibujar y Pintar Pétalos (Curvas con relleno)
             if (typeof pintarPetalos !== 'undefined') {
                 pintarPetalos.forEach(petalo => {
-                    // Llamamos a la NUEVA función, pasándole el array de puntos completo
-                    dibujarPoligonoCurvo(
+                    dibujarCurvaAutomatica(
                         ctx,
                         proj,
-                        petalo.puntos,
+                        petalo.puntos[0],
+                        petalo.puntos[1],
                         petalo.color,
                         petalo.altura,
-                        puntosAnimados
+                        petalo.angulo,
+                        true // <--- 'true' activa el relleno del plano
                     );
                 });
             }
@@ -136,14 +102,14 @@
             // 5. Dibujar esferas
             if (typeof puntos_con_esfera !== 'undefined') {
                 puntos_con_esfera.forEach(idx => {
-                    const p = proj(puntosAnimados[idx]);
+                    const p = proj(puntos[idx]);
                     dibujarEsferaSencilla(ctx, p, 15 * estado.zoom, "#b0c4de");
                 });
             }
 
             // 6. Dibujar PUNTOS Y NÚMEROS --> ¡ESTO TAMBIÉN FALTABA!
             if (typeof puntos !== 'undefined') {
-                puntosAnimados.forEach((p3d, i) => {
+                puntos.forEach((p3d, i) => {
                     const p = proj(p3d);
                     ctx.fillStyle = (i === 18) ? "#ffffff" : "#ff006e";
                     ctx.beginPath();

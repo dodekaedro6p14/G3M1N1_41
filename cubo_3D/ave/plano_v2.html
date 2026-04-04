@@ -3,8 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Plano_v3</title>
-    <link rel="stylesheet" href="styles_geo.css">
+    <title>Av3_v2</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -23,9 +23,9 @@
     </div>
     <canvas id="canvas"></canvas>
 
-    <script src="./script/datos_flor_v2.js"></script>
-    <script src="./script/m_grafico_v3.js"></script>
-    <script src="./script/controles.js"></script>
+    <script src="datos_ave_v1.js"></script>
+    <script src="m_grafico_v2.js"></script>
+    <script src="controles_v2.js"></script>
 
     <script>
         const canvas = document.getElementById('canvas');
@@ -36,15 +36,12 @@
             angleX: 0,
             angleY: 0,
             angleZ: 0,
-            angleZ_puntos: 0,
             zoom: 1.0,
             animacionActiva: false,
-           /*  animacionZ: false,
-            animacionX: false, 
-            angleZ_puntos: 0,*/
-            animacionZ_puntos_activa: false,
             mostrarIndices: true,
-            velocidadGiro: 0.01
+            velocidadGiro: 0.01,
+            animacionPuntos: false, 
+            tiempoOscilacion: 0
         };
 
         // Inicializamos los controles pasándole el objeto estado
@@ -55,42 +52,16 @@
             if (estado.animacionActiva) {
                 estado.angleY += estado.velocidadGiro;
             }
-           /*  if (estado.animacionZ) {
-                estado.angleZ += estado.velocidadGiro;
-            }
-            if (estado.animacionX) {
-                estado.angleX += estado.velocidadGiro;
-            } */
-            if (estado.animacionZ_puntos_activa) {
-                // Esto le suma un poquito al ángulo en cada frame (es la velocidad)
-                // Puedes subir o bajar este número (ej: 0.02 o 0.1) para que lata más rápido
-                estado.angleZ_puntos = (estado.angleZ_puntos || 0) + 0.05;
+            if (typeof animarGrupoPuntos !== 'undefined') {
+                animarGrupoPuntos(puntos, [9, 10, 11, 12, 13, 14], estado);
             }
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // 2. CREAR PUNTOS TRANSFORMADOS
             // En lugar de usar 'puntos' directamente, creamos una copia rotada
-            const puntosAnimados = puntos.map(p => {
-                if (estado.animacionZ) {
-                    let x = p[0];
-                    let y = p[1];
-                    let z = p[2];
-
-                    // Rotación simple en Z para cada punto
-                    let cos = Math.cos(estado.angleZ_puntos);
-                    let sin = Math.sin(estado.angleZ_puntos);
-
-                    let nx = x * cos - (y + Math.sin(estado.angleZ_puntos) * 10) * sin;
-                    let ny = x * sin + (y + Math.sin(estado.angleZ_puntos) * 10) * cos;
-
-                    return [nx, ny, z];
-                }
-                return p; // Si la animación está apagada, devolvemos el punto original
-            });
-
-            // Proyector simplificado usando el estado actual
-            const proj = (p) => proyectar(p, canvas.width, canvas.height, estado.angleX, estado.angleY, estado.angleZ, estado.zoom);
+         // Proyector simplificado usando el estado actual
+            const proj = (p) => proyectar(p, canvas.width, canvas.height, estado.angleX, estado.angleY, estado.zoom);
 
             // 1. Dibujar ejes
             if (estado.mostrarIndices) dibujarEjes(ctx, proj);
@@ -113,8 +84,7 @@
                         proj,
                         petalo.puntos,
                         petalo.color,
-                        petalo.altura,
-                        puntosAnimados
+                        petalo.altura
                     );
                 });
             }
@@ -136,18 +106,18 @@
             // 5. Dibujar esferas
             if (typeof puntos_con_esfera !== 'undefined') {
                 puntos_con_esfera.forEach(idx => {
-                    const p = proj(puntosAnimados[idx]);
-                    dibujarEsferaSencilla(ctx, p, 15 * estado.zoom, "#b0c4de");
+                    const p = proj(puntos[idx]);
+                    dibujarEsferaSencilla(ctx, p, 30 * estado.zoom, "#b0c4de"); // radio de la Circunferencia
                 });
             }
 
             // 6. Dibujar PUNTOS Y NÚMEROS --> ¡ESTO TAMBIÉN FALTABA!
             if (typeof puntos !== 'undefined') {
-                puntosAnimados.forEach((p3d, i) => {
+                puntos.forEach((p3d, i) => {
                     const p = proj(p3d);
-                    ctx.fillStyle = (i === 18) ? "#ffffff" : "#ff006e";
+                    ctx.fillStyle = (i === 0) ? "#ffffff" : "#ff006e";
                     ctx.beginPath();
-                    ctx.arc(p.x, p.y, (i === 18) ? 2 : 1.5, 0, Math.PI * 2);
+                    ctx.arc(p.x, p.y, (i === 0) ? 2 : 1.5, 0, Math.PI * 2);
                     ctx.fill();
 
                     if (estado.mostrarIndices) {
@@ -163,7 +133,7 @@
             }
 
             requestAnimationFrame(loop);
-        }
+        }   
 
         // Redimensionar y arrancar
         window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };

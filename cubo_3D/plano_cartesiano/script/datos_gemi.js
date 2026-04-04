@@ -37,3 +37,12 @@ const misPoligonos = [
     { puntos: [13, 14, 17], color: "rgba(255, 0, 110, 0.5)" },
     { puntos: [14, 17, 16, 15], color: "rgba(0, 251, 255, 0.5)" } // Cuadrado
 ];
+// --- datos_flor.js ---
+const pintarPetalos = [
+    // Curva normal (hacia la derecha/arriba)
+    { puntos: [1, 7], color: "rgba(255, 0, 110, 0.3)", altura: 60, angulo: 180 },
+    
+    // Curva invertida (hacia la izquierda/abajo) 
+    // Nota que usamos altura: -60 para que no se encime con la anterior
+    { puntos: [5, 2], color: "rgba(255, 0, 110, 0.3)", altura: -60, angulo: 180 }
+];
