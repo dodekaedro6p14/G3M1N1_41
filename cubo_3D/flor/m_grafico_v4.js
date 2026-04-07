@@ -4,7 +4,7 @@
 
 // --- A. FUNCIÓN DE PROYECCIÓN 3D A 2D ---
 // Ahora recibe las medidas y ángulos directamente del estado
-function proyectar(p3d, width, height, angleX, angleY, zoom) {
+function proyectar(p3d, width, height, angleX, angleY, angleZ, zoom) {
     let x = p3d[0], y = p3d[1], z = p3d[2];
 
     // Rotación Eje X
@@ -19,6 +19,12 @@ function proyectar(p3d, width, height, angleX, angleY, zoom) {
     let z2 = -x * sinY + z * cosY;
     x = x1; z = z2;
 
+    // --- NUEVA: ROTACIÓN EJE Z ---
+    let cosZ = Math.cos(angleZ), sinZ = Math.sin(angleZ);
+    let x2 = x * cosZ - y * sinZ;
+    let y2 = x * sinZ + y * cosZ;
+    x = x2; y = y2;
+
     // Perspectiva y Zoom
     let fov = 300;
     let zPerspective = z + 200;
@@ -32,29 +38,27 @@ function proyectar(p3d, width, height, angleX, angleY, zoom) {
 }
 
 // --- B. FUNCION = DIBUJAR ESFERAS ---
-function dibujarEsferaSencilla(ctx, p2d, radio, colorBase = "#ff0000", opacidad = 0.5) {
+function dibujarEsferaSencilla(ctx, p2d, radio = 80, colorBase = "#ff0000", opacidad = 0.5) {
     ctx.beginPath();
 
     let grd = ctx.createRadialGradient(
-        p2d.x, p2d.y, radio * 0.2, //0.2
+        p2d.x, p2d.y, radio * 0.2,
         p2d.x, p2d.y, radio
     );
     grd.addColorStop(0, colorBase); 
-    grd.addColorStop(1, "#ffff80"); 
+    grd.addColorStop(1, "#ffffb3"); 
 
     ctx.fillStyle = grd; // Usamos el degradado
     ctx.globalAlpha = opacidad;
-    ctx.radio = 250; // 80
     ctx.arc(p2d.x, p2d.y, radio, 0, Math.PI * 2);
     ctx.fill();
     ctx.globalAlpha = 1.0; // MUY IMPORTANTE: Resetear opacidad para no afectar el resto
     ctx.closePath();
 }
 
-// --- C. FUNCTION = DIBUJAR CURVAS ---
-function dibujarCurvaAutomatica(ctx, proyectarFn, indiceA, indiceB, color = "#ff006e", altura = 50, angulo = 180, rellenar = false) {
-    let pA = puntos[indiceA];
-    let pB = puntos[indiceB];
+function dibujarCurvaAutomatica(ctx, proyectarFn, indiceA, indiceB, color = "#ff006e", altura = 50, angulo = 180, rellenar = false, puntosAUsar = puntos) {
+    let pA = puntosAUsar[indiceA];
+    let pB = puntosAUsar[indiceB];
     if (!pA || !pB) return;
 
     ctx.beginPath();
@@ -123,15 +127,15 @@ function dibujarEjes(ctx, proyectarFn) {
 }
 
 // --- E. FUNCION PINTAR POLIGONOS ---
-function dibujarPoligono(ctx, proyectarFn, indices, color = "rgba(0, 251, 255, 1.0)") {
+function dibujarPoligono(ctx, proyectarFn, indices, color = "rgba(0, 251, 255, 1.0)", puntosAUsar = puntos) {
     if (indices.length < 3) return; 
 
     ctx.beginPath();
-    let pInicio = proyectarFn(puntos[indices[0]]);
+    let pInicio = proyectarFn(puntosAUsar[indices[0]]);
     ctx.moveTo(pInicio.x, pInicio.y);
 
     for (let i = 1; i < indices.length; i++) {
-        let p = proyectarFn(puntos[indices[i]]);
+        let p = proyectarFn(puntosAUsar[indices[i]]);
         ctx.lineTo(p.x, p.y);
     }
 
@@ -146,7 +150,7 @@ function dibujarPoligono(ctx, proyectarFn, indices, color = "rgba(0, 251, 255, 1
 
 
 // --- F. NUEVA FUNCIÓN: POLÍGONO CON BORDES CURVOS (PÉTALOS) ---
-function dibujarPoligonoCurvo(ctx, proyectarFn, indices, color = "rgba(255, 0, 110, 0.3)", altura = 50) {
+function dibujarPoligonoCurvo(ctx, proyectarFn, indices, color = "rgba(255, 0, 110, 0.3)", altura = 50, puntosAUsar = puntos) {
     if (!indices || indices.length < 3) return; // Necesita al menos 3 puntos
 
     ctx.beginPath();
@@ -159,9 +163,9 @@ function dibujarPoligonoCurvo(ctx, proyectarFn, indices, color = "rgba(255, 0, 1
 
     // Recorremos cada punto para conectarlo con el siguiente
     for (let k = 0; k < indices.length; k++) {
-        let pA = puntos[indices[k]];
+        let pA = puntosAUsar[indices[k]];
         // El siguiente punto (si es el último, vuelve al primero para cerrar la figura)
-        let pB = puntos[indices[(k + 1) % indices.length]]; 
+        let pB = puntosAUsar[indices[(k + 1) % indices.length]]; 
         
         if (!pA || !pB) continue;
 

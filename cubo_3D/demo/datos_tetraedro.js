@@ -1,17 +1,17 @@
 // --- 3. LISTA DE CONEXIONES CURVAS ---
 // Agrega aquí los pares de puntos que quieres unir
 const conexiones_curvas = [
-    [0]
+    [2, 3], [3, 4], [4, 2], // tetaedro superior
 ];
 
 // --- 4. LISTA DE ESFERAS ---
 // Elegir los punos para agregar esferas
-const puntos_esfera = [];
+const puntos_con_esfera = [7,3];
 
 // --- 5. CONEXION DE LOS PUNTOS ---
 const conexiones = [
-    [1, 2],[2, 3],[2, 4],[4, 1],[3,1],[4,3], // tetaedro superior
-    [5,6],[5,7],[6,7],[7,8],[6,8],[8,5] 
+    /* [1, 2],[2, 3],[2, 4],[4, 1],[3,1],[4,3], // tetaedro superior
+    [5,6],[5,7],[6,7],[7,8],[6,8],[8,5]  */
 
   /*   [1, 6], [7, 1], [8, 1], [8, 7], [7, 6], [6,8],
     [5, 2], [5, 3],[5, 4], [4, 3], [4, 2], // tetraedro
@@ -42,9 +42,17 @@ const puntos = [
 // --- 7. PINTAR UN POLIGONO DENTRO DEL PLANO ...
 // Ejemplo: Un triángulo (3 puntos) y un cuadrado (4 puntos)
 const misPoligonos = [
-    /* { puntos: [13, 15, 16], color: "rgba(255, 0, 110, 0.5)" }, // Triángulo
-    { puntos: [13, 17, 16], color: "rgba(255, 0, 110, 0.5)" },
-    { puntos: [13, 14, 16], color: "rgba(255, 0, 110, 0.5)" },
+   { puntos: [1, 2, 3], color: "rgba(255, 0, 110, 0.5)" }, // Triángulo
+    { puntos: [5, 7, 6], color: "rgba(255, 0, 110, 0.5)" },
+/*    { puntos: [13, 14, 16], color: "rgba(255, 0, 110, 0.5)" },
     { puntos: [13, 14, 17], color: "rgba(255, 0, 110, 0.5)" },
     { puntos: [14, 17, 16, 15], color: "rgba(0, 251, 255, 0.5)" } // Cuadrado */
 ];
+const pintarPetalos = [
+/*     { puntos: [1,2,3], color: "rgba(255, 0, 110, 1.2)", altura: 0 }, 
+    { puntos: [2,3,4], color: "rgba(255, 0, 110, 1.2)", altura: 0 }, 
+    { puntos: [2,1,4], color: "rgba(255, 0, 110, 1.2)", altura: 0 }, 
+    { puntos: [5,6,7], color: "rgba(255, 0, 110, 1.2)", altura: 0 }, 
+    { puntos: [6,7,8], color: "rgba(255, 0, 110, 1.2)", altura: 0 },   
+    { puntos: [6,5,8], color: "rgba(255, 0, 110, 1.2)", altura: 0 }  */
+];    

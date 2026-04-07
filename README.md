@@ -23,7 +23,14 @@ bio_informatica{
 };
 
 cubo_3D {
-    curva{};
+    ave{
+        Elige el plano HTML, el mas actualizado es el ultimo.
+        Asegurate de tenga los script segun el motor grafico V1, v2, v3, escoje el y el ultimo control para que el programa se ejecute sin problemas
+    };
+
+    aracnido{
+
+    };
 
     plano_cartesiano{
         Ejecutar plano_editable.html, escoger scrit para visualizar 
