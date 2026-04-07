@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Visualización Cubo Vertical 3D - fruta</title>
+    <style>
+        :root {
+            /* Tus estilos estándar */
+            --bg-color: #0f172a;
+            --secondary: #818cf8;
+            --accent: #e74c3c;
+            --text-color: #c9d1d9;
+            --accent-color: #58a6ff;
+            --energy-color: #f9e231;
+            
+            /* Ajustes de tamaño */
+            --cube-size: 200px;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: sans-serif;
+            overflow: hidden;
+            perspective: 1000px; /* Esencial para el 3D */
+        }
+
+        .scene {
+            width: var(--cube-size);
+            height: var(--cube-size);
+        }
+
+        .cube {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            /* Esta es la rotación mágica para ponerlo vertical por la diagonal */
+            transform: rotateX(-35deg) rotateY(45deg); 
+            animation: rotateCube 10s infinite linear;
+        }
+
+        @keyframes rotateCube {
+            from { transform: rotateX(-35deg) rotateY(0deg); }
+            to { transform: rotateX(-35deg) rotateY(360deg); }
+        }
+
+        /* Estilo de las caras (transparentes) */
+        .face {
+            position: absolute;
+            width: var(--cube-size);
+            height: var(--cube-size);
+            border: 2px solid var(--secondary);
+            background: rgba(129, 140, 248, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            backface-visibility: visible;
+        }
+
+        /* Posicionamiento de las caras */
+        .front  { transform: rotateY(  0deg) translateZ(calc(var(--cube-size) / 2)); }
+        .back   { transform: rotateY(180deg) translateZ(calc(var(--cube-size) / 2)); }
+        .right  { transform: rotateY( 90deg) translateZ(calc(var(--cube-size) / 2)); }
+        .left   { transform: rotateY(-90deg) translateZ(calc(var(--cube-size) / 2)); }
+        .top    { transform: rotateX( 90deg) translateZ(calc(var(--cube-size) / 2)); }
+        .bottom { transform: rotateX(-90deg) translateZ(calc(var(--cube-size) / 2)); }
+
+        /* Estilo de los vértices (etiquetas) */
+        .vertex-label {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--energy-color);
+            color: var(--bg-color);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+            box-shadow: 0 0 10px var(--accent-color);
+            z-index: 10;
+        }
+
+        /* Posicionamiento exacto de los 8 vértices A-H */
+        /* Basado en (+-1, +-1, +-1) */
+        
+        /* Capa Superior */
+        .v-A { transform: translate3d(var(--cube-size), 0px, var(--cube-size)); } /* (1,1,1) -> Top */
+        
+        /* Capa Hexágono Superior */
+        .v-B { transform: translate3d(0px, 0px, var(--cube-size)); } 
+        .v-C { transform: translate3d(var(--cube-size), var(--cube-size), var(--cube-size)); }
+        .v-D { transform: translate3d(var(--cube-size), 0px, 0px); }
+
+        /* Capa Hexágono Inferior */
+        .v-E { transform: translate3d(0px, 0px, 0px); }
+        .v-F { transform: translate3d(0px, var(--cube-size), var(--cube-size)); }
+        .v-G { transform: translate3d(var(--cube-size), var(--cube-size), 0px); }
+
+        /* Capa Inferior */
+        .v-H { transform: translate3d(0px, var(--cube-size), 0px); } /* (-1,-1,-1) -> Bottom */
+
+    </style>
+</head>
+<body>
+
+    <div class="scene">
+        <div class="cube">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face right"></div>
+            <div class="face left"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+
+            <div class="vertex-label v-A">A</div>
+            <div class="vertex-label v-B">B</div>
+            <div class="vertex-label v-C">C</div>
+            <div class="vertex-label v-D">D</div>
+            <div class="vertex-label v-E">E</div>
+            <div class="vertex-label v-F">F</div>
+            <div class="vertex-label v-G">G</div>
+            <div class="vertex-label v-H">H</div>
+        </div>
+    </div>
+
+</body>
+</html>

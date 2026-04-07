@@ -51,23 +51,11 @@
             if (estado.animacionActiva) {
                 estado.angleY += estado.velocidadGiro;
             }
-           /*  if (estado.animacionZ) {
-                estado.angleZ += estado.velocidadGiro;
-            }
-            if (estado.animacionX) {
-                estado.angleX += estado.velocidadGiro;
-            } 
-            if (estado.animacionZ_puntos_activa) {
-                // Esto le suma un poquito al ángulo en cada frame (es la velocidad)
-                // Puedes subir o bajar este número (ej: 0.02 o 0.1) para que lata más rápido
-                estado.angleZ_puntos = (estado.angleZ_puntos || 0) + 0.05;
-            }*/
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // 2. CREAR PUNTOS TRANSFORMADOS
             // En lugar de usar 'puntos' directamente, creamos una copia rotada
-         // Proyector simplificado usando el estado actual
             const proj = (p) => proyectar(p, canvas.width, canvas.height, estado.angleX, estado.angleY, estado.zoom);
 
             // 1. Dibujar ejes

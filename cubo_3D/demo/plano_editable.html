@@ -3,90 +3,92 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Plano_v3</title>
+    <title>ED174BL3 - Fruta Edition</title>
     <link rel="stylesheet" href="styles_geo.css">
 </head>
 
 <body>
+
     <div id="background-guide"></div>
 
     <div id="panel-info">
         <h2 style="margin:0; text-shadow: 0 0 5px #00fbff;">EDITOR_pl4N0</h2>
-        <p style="font-size: 11px; color: cyan; margin-bottom: 5px;">
+        <p>
             EJES: <span style="color:#ff4d4d">X(A-D)</span> |
             <span style="color:#4dff4d">Y(W-S)</span> |
             <span style="color:#4d4dff">Z(Q-E zoom)</span><br>
             <span style="color: #ff4dd2">P: Giro Automático</span><br>
             <span style="color: #ffff00">V: Ocultar/Mostrar Números</span><br>
+            <span style="color: #ff4d4d">L: Giro de la Flor</span><br>
             R: Resetear Multiverso
         </p>
     </div>
-    <canvas id="canvas"></canvas>
 
-    <script src="./script/datos_flor_v2.js"></script>
-    <script src="./script/m_grafico_v3.js"></script>
-    <script src="./script/controles.js"></script>
+    <canvas id="canvas"></canvas>
+    <script src="datos_tetraedro.js"></script> <!-- Escoge el diseño para visualizar o editar-->
+    <script src="m_grafico_v4.js"></script>
+    <script src="controles_v2.js"></script>
 
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
 
-        // Objeto Central de Estado (Para que todos los archivos lean de aquí)
+        // --- 1. VARIABLES PRINCIPALES ---
         const estado = {
             angleX: 0,
             angleY: 0,
             angleZ: 0,
-            angleZ_puntos: 0,
+            angleZ_puntos: 0, // Ángulo de rotación interna
             zoom: 1.0,
             animacionActiva: false,
-           /*  animacionZ: false,
-            animacionX: false, 
-            angleZ_puntos: 0,*/
             animacionZ_puntos_activa: false,
             mostrarIndices: true,
-            velocidadGiro: 0.01
+            velocidadGiro: 0.01,
+            velocidadPuntos: 0.0005
         };
 
-        // Inicializamos los controles pasándole el objeto estado
+        // Inicionalizamos los controles pasándole el objeto estado
         configurarControles(estado);
-
+        // --- F. MOTOR PRINCIPAL DE ANIMACIÓN ---
         function loop() {
-            // Lógica de rotación automática
-            if (estado.animacionActiva) {
+            // --- DENTRO DE loop() ---
+
+            // 1. Giro de CÁMARA (Solo si P está activo Y L está apagado para no sumar velocidades)
+            if (estado.animacionActiva && !estado.animacionZ_puntos_activa) {
                 estado.angleY += estado.velocidadGiro;
             }
-           /*  if (estado.animacionZ) {
-                estado.angleZ += estado.velocidadGiro;
-            }
-            if (estado.animacionX) {
-                estado.angleX += estado.velocidadGiro;
-            } */
-            if (estado.animacionZ_puntos_activa) {
-                // Esto le suma un poquito al ángulo en cada frame (es la velocidad)
-                // Puedes subir o bajar este número (ej: 0.02 o 0.1) para que lata más rápido
-                estado.angleZ_puntos = (estado.angleZ_puntos || 0) + 0.05;
-            }
 
+            // 2. Giro de la FLOR (Tecla L - El que quieres que sea lento)
+            if (estado.animacionZ_puntos_activa) {
+                // Usa un número fijo aquí, NO uses estado.velocidadGiro
+                estado.angleZ_puntos -= 0.005;
+            }
+            else if (estado.animacionActiva) {
+                // Si no hay animación, resetea el ángulo de los puntos para que no queden rotados
+                estado.angleY += estado.velocidadGiro;
+            }
+            // Limpia la escena
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 2. CREAR PUNTOS TRANSFORMADOS
-            // En lugar de usar 'puntos' directamente, creamos una copia rotada
+            // 3. TRANSFORMACIÓN DE PUNTOS (giro sobre eje Y propio)
+            // --- DENTRO DE LA FUNCIÓN loop() ---
             const puntosAnimados = puntos.map(p => {
-                if (estado.animacionZ) {
-                    let x = p[0];
-                    let y = p[1];
-                    let z = p[2];
+                if (estado.animacionZ_puntos_activa) {
+                    let x = p[0], y = p[1], z = p[2];
 
-                    // Rotación simple en Z para cada punto
-                    let cos = Math.cos(estado.angleZ_puntos);
-                    let sin = Math.sin(estado.angleZ_puntos);
+                    // USAMOS EL ÁNGULO NEGATIVO PARA SENTIDO CONTRARIO
+                    let anguloInverso = -estado.angleZ_puntos;
 
-                    let nx = x * cos - (y + Math.sin(estado.angleZ_puntos) * 10) * sin;
-                    let ny = x * sin + (y + Math.sin(estado.angleZ_puntos) * 10) * cos;
+                    let cos = Math.cos(anguloInverso);
+                    let sin = Math.sin(anguloInverso);
 
-                    return [nx, ny, z];
+                    // Aplicamos la rotación
+                    let nx = x * cos + z * sin;
+                    let nz = -x * sin + z * cos;
+
+                    return [nx, y, nz];
                 }
-                return p; // Si la animación está apagada, devolvemos el punto original
+                return [...p];
             });
 
             // Proyector simplificado usando el estado actual
@@ -97,12 +99,18 @@
 
             // 2. Dibujar polígonos
             if (typeof misPoligonos !== 'undefined') {
-                misPoligonos.forEach(poli => dibujarPoligono(ctx, proj, poli.puntos, poli.color));
+                misPoligonos.forEach(poli => {
+                    dibujarPoligono(ctx, proj, poli.puntos, poli.color, puntosAnimados);
+                });
             }
 
             // 3. Dibujar curvas
+            // 3. Dibujar curvas
             if (typeof conexiones_curvas !== 'undefined') {
-                conexiones_curvas.forEach(par => dibujarCurvaAutomatica(ctx, proj, par[0], par[1]));
+                conexiones_curvas.forEach(par => {
+                    // Orden: ctx, proj, indA, indB, color, altura, angulo, rellenar, PUNTOS_ANIMADOS
+                    dibujarCurvaAutomatica(ctx, proj, par[0], par[1], "#ff006e", 50, 180, false, puntosAnimados);
+                });
             }
             // 3.5 Dibujar y Pintar Pétalos (Curvas con relleno)
             if (typeof pintarPetalos !== 'undefined') {
@@ -121,11 +129,13 @@
 
             // 4. Dibujar MALLA PRINCIPAL (Líneas rectas) --> ¡ESTO FALTABA!
             if (typeof conexiones !== 'undefined') {
-                ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.2)"; // Color sugerido más suave
                 ctx.lineWidth = 1;
                 conexiones.forEach(c => {
-                    const p1 = proj(puntos[c[0]]);
-                    const p2 = proj(puntos[c[1]]);
+                    // CAMBIO AQUÍ: Usar puntosAnimados en lugar de puntos
+                    const p1 = proj(puntosAnimados[c[0]]);
+                    const p2 = proj(puntosAnimados[c[1]]);
+
                     ctx.beginPath();
                     ctx.moveTo(p1.x, p1.y);
                     ctx.lineTo(p2.x, p2.y);
@@ -137,7 +147,7 @@
             if (typeof puntos_con_esfera !== 'undefined') {
                 puntos_con_esfera.forEach(idx => {
                     const p = proj(puntosAnimados[idx]);
-                    dibujarEsferaSencilla(ctx, p, 15 * estado.zoom, "#b0c4de");
+                    dibujarEsferaSencilla(ctx, p, 15 * estado.zoom, "#b0c4de", puntosAnimados);
                 });
             }
 
@@ -145,13 +155,13 @@
             if (typeof puntos !== 'undefined') {
                 puntosAnimados.forEach((p3d, i) => {
                     const p = proj(p3d);
-                    ctx.fillStyle = (i === 18) ? "#ffffff" : "#ff006e";
+                    ctx.fillStyle = (i === 0) ? "rgba(255, 255, 255, 0.8)" : "rgba(255, 182, 193, 0.8)"; // "#ffffff" : "#ff006e"
                     ctx.beginPath();
-                    ctx.arc(p.x, p.y, (i === 18) ? 2 : 1.5, 0, Math.PI * 2);
+                    ctx.arc(p.x, p.y, (i === 0) ? 2 : 1.5, 0, Math.PI * 2);
                     ctx.fill();
 
                     if (estado.mostrarIndices) {
-                        ctx.fillStyle = "#fff";
+                        ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
                         ctx.font = "9px Courier New";
                         if (i === 18) {
                             ctx.fillText('', p.x + 12, p.y - 12);
@@ -169,6 +179,8 @@
         window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
         window.onresize();
         loop();
+
+
     </script>
 </body>
 

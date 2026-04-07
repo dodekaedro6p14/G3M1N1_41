@@ -3,30 +3,30 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Av3_v3</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Plano_v3</title>
+    <link rel="stylesheet" href="styles_geo.css">
 </head>
 
 <body>
     <div id="background-guide"></div>
 
     <div id="panel-info">
-        <h2 style="margin:0; text-shadow: 0 0 5px var(--energy-color);">EDITOR_pl4N0</h2>
-        <p style="font-size: 14px; color: cyan; margin-bottom: 5px;">
+        <h2 style="margin:0; text-shadow: 0 0 5px #00fbff;">EDITOR_pl4N0</h2>
+        <p> 
             EJES: <span style="color:#ff4d4d">X(A-D)</span> |
             <span style="color:#4dff4d">Y(W-S)</span> |
-            <span style="color:#4d4dff">Z(Q-E zoom)</span><br>
+            <span style="color:#ff00ff">Z(Q-E zoom)</span><br>
             <span style="color: #ff4dd2">P: Giro Automático</span><br>
-            <span style="color: var(--energy-color)">V: Ocultar/Mostrar Números</span><br>
-            <span style="color: var(--energy-color)">T: Levitar Puntos Centrales</span><br>
+            <span style="color: #ffff00">V: Ocultar/Mostrar Números</span><br>
+            <span style="color: #ff4d4d">L: Giro de la Flor</span><br>
             R: Resetear Multiverso
         </p>
     </div>
     <canvas id="canvas"></canvas>
 
-    <script src="datos_ave_v1.js"></script>
-    <script src="m_grafico_v3.js"></script>
-    <script src="controles_v2.js"></script>
+    <script src="./datos_flor_v2.js"></script>
+    <script src="./m_grafico_v4.js"></script>
+    <script src="./controles_v2.js"></script>
 
     <script>
         const canvas = document.getElementById('canvas');
@@ -37,66 +37,77 @@
             angleX: 0,
             angleY: 0,
             angleZ: 0,
+            angleZ_puntos: 0, // Ángulo de rotación interna
             zoom: 1.0,
-            animacionActiva: false,
+            animacionActiva: false, // Giro de la camara
+            animacionZ_puntos_activa: false, // Giro del objeto
             mostrarIndices: true,
             velocidadGiro: 0.01,
-            animacionPuntos: false,
-            tiempoOscilacion: 0
+            velocidadPuntos: 0.0005
         };
 
         // Inicializamos los controles pasándole el objeto estado
         configurarControles(estado);
 
         function loop() {
-            // Lógica de rotación automática
-            if (estado.animacionActiva) {
+            // --- DENTRO DE loop() ---
+
+            // 1. Giro de CÁMARA (Solo si P está activo Y L está apagado para no sumar velocidades)
+            if (estado.animacionActiva && !estado.animacionZ_puntos_activa) {
                 estado.angleY += estado.velocidadGiro;
             }
-            if (estado.animacionPuntos) {
-                // Incrementamos el tiempo general
-                estado.tiempoOscilacion = (estado.tiempoOscilacion || 0) + 1;
 
-                // GRUPO A: Puntos generales (9, 10, 12, 13)
-                levitarPuntos(puntos, [9, 10, 12, 13], estado, {
-                    amplitud: 15,  //10
-                    velocidad: 0.05,
-                    fase: 0
-                });
-
-                // GRUPO B: Puntos independientes {11, 14}
-                // Les damos más amplitud y una velocidad distinta
-                levitarPuntos(puntos, [11, 14], estado, {
-                    amplitud: 45,    // Mucho más marcado
-                    velocidad: 0.05,  // Más rápido
-                    fase: Math.PI     // Esto hace que cuando unos bajen, estos suban
-                });
-                // Grupos C 
-                levitarPuntos(puntos, [0, 1, 2, 3, 4, 5, 6, 7, 8], estado, {
-                    amplitud: 10,  //10
-                    velocidad: 0.05,
-                    fase: 0
-                });
+            // 2. Giro de la FLOR (Tecla L - El que quieres que sea lento)
+            if (estado.animacionZ_puntos_activa) {
+                // Usa un número fijo aquí, NO uses estado.velocidadGiro
+                estado.angleZ_puntos -= 0.005;
             }
-
+            else if (estado.animacionActiva) {
+                // Si no hay animación, resetea el ángulo de los puntos para que no queden rotados
+                estado.angleY += estado.velocidadGiro;
+            }
+            // Limpia la escena
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 2. CREAR PUNTOS TRANSFORMADOS
-            // En lugar de usar 'puntos' directamente, creamos una copia rotada
+            // 3. TRANSFORMACIÓN DE PUNTOS (giro sobre eje Y propio)
+            // --- DENTRO DE LA FUNCIÓN loop() ---
+            const puntosAnimados = puntos.map(p => {
+                if (estado.animacionZ_puntos_activa) {
+                    let x = p[0], y = p[1], z = p[2];
+
+                    // USAMOS EL ÁNGULO NEGATIVO PARA SENTIDO CONTRARIO
+                    let anguloInverso = -estado.angleZ_puntos;
+
+                    let cos = Math.cos(anguloInverso);
+                    let sin = Math.sin(anguloInverso);
+
+                    // Aplicamos la rotación
+                    let nx = x * cos + z * sin;
+                    let nz = -x * sin + z * cos;
+
+                    return [nx, y, nz];
+                }
+                return [...p];
+            });
+
             // Proyector simplificado usando el estado actual
-            const proj = (p) => proyectar(p, canvas.width, canvas.height, estado.angleX, estado.angleY, estado.zoom);
+            const proj = (p) => proyectar(p, canvas.width, canvas.height, estado.angleX, estado.angleY, estado.angleZ, estado.zoom);
 
             // 1. Dibujar ejes
             if (estado.mostrarIndices) dibujarEjes(ctx, proj);
 
             // 2. Dibujar polígonos
             if (typeof misPoligonos !== 'undefined') {
-                misPoligonos.forEach(poli => dibujarPoligono(ctx, proj, poli.puntos, poli.color));
+                misPoligonos.forEach(poli => dibujarPoligono(ctx, proj, poli.puntos, poli.color, puntosAnimados));
             }
+
+           /*  if (estado.animacionZ_puntos_activa) {
+                estado.angleZ_puntos += 0.03;
+            } */
 
             // 3. Dibujar curvas
             if (typeof conexiones_curvas !== 'undefined') {
-                conexiones_curvas.forEach(par => dibujarCurvaAutomatica(ctx, proj, par[0], par[1]));
+                conexiones_curvas.forEach(par => dibujarCurvaAutomatica(ctx, proj, par[0], par[1], puntosAnimados));
             }
             // 3.5 Dibujar y Pintar Pétalos (Curvas con relleno)
             if (typeof pintarPetalos !== 'undefined') {
@@ -107,14 +118,15 @@
                         proj,
                         petalo.puntos,
                         petalo.color,
-                        petalo.altura
+                        petalo.altura,
+                        puntosAnimados
                     );
                 });
             }
 
             // 4. Dibujar MALLA PRINCIPAL (Líneas rectas) --> ¡ESTO FALTABA!
             if (typeof conexiones !== 'undefined') {
-                ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
                 ctx.lineWidth = 1;
                 conexiones.forEach(c => {
                     const p1 = proj(puntos[c[0]]);
@@ -129,22 +141,22 @@
             // 5. Dibujar esferas
             if (typeof puntos_con_esfera !== 'undefined') {
                 puntos_con_esfera.forEach(idx => {
-                    const p = proj(puntos[idx]);
-                    dibujarEsferaSencilla(ctx, p, 30 * estado.zoom, "#b0c4de"); // radio de la Circunferencia
+                    const p = proj(puntosAnimados[idx]);
+                    dibujarEsferaSencilla(ctx, p, 15 * estado.zoom, "#b0c4de", puntosAnimados);
                 });
             }
 
             // 6. Dibujar PUNTOS Y NÚMEROS --> ¡ESTO TAMBIÉN FALTABA!
             if (typeof puntos !== 'undefined') {
-                puntos.forEach((p3d, i) => {
+                puntosAnimados.forEach((p3d, i) => {
                     const p = proj(p3d);
-                    ctx.fillStyle = (i === 0) ? "#ffffff" : "#ff006e";
+                    ctx.fillStyle = (i === 0) ? "rgba(255, 255, 255, 0.8)" : "rgba(255, 182, 193, 0.8)"; // "#ffffff" : "#ff006e"
                     ctx.beginPath();
                     ctx.arc(p.x, p.y, (i === 0) ? 2 : 1.5, 0, Math.PI * 2);
                     ctx.fill();
 
                     if (estado.mostrarIndices) {
-                        ctx.fillStyle = "#fff";
+                        ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
                         ctx.font = "9px Courier New";
                         if (i === 18) {
                             ctx.fillText('', p.x + 12, p.y - 12);

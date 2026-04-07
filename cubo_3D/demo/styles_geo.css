@@ -1,4 +1,11 @@
- body {
+:root{
+    --text-color:#00fbff;
+    --bg-color:#050508;
+    --energy-color:#ffff00;
+}
+
+
+body {
      margin: 0;
      background-color: #050508;
      color: #00fbff;
@@ -11,6 +18,12 @@
      /* Toque de atmósfera cósmica */
      background: radial-gradient(circle at center, #1a0b2e 0%, #050508 100%);
  }
+p {
+    font-size: 14px;
+    color: var(--text-color);
+    margin-bottom: 5px;
+
+}
 
  #background-guide {
      position: absolute;
@@ -39,7 +52,7 @@
      left: 20px;
      border-left: 3px solid #ff006e;
      padding: 15px;
-     background: rgba(10, 5, 20, 0.85);
+     background: rgba(51, 51, 51, 0.85);
      box-shadow: 0 0 15px rgba(255, 0, 110, 0.3);
      border-radius: 0 10px 10px 0;
      backdrop-filter: blur(5px);
