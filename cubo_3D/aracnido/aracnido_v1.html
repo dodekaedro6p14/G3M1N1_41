@@ -3,8 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Arac_v1
-    </title>
+    <title>Arac_v1</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -72,14 +71,14 @@
             // 2. Dibujar polígonos
             if (typeof misPoligonos !== 'undefined') {
                 misPoligonos.forEach(poli => {
-                    dibujarPoligono(ctx, proj, poli.puntos, poli.color, puntosAnimados);
+                    dibujarPoligono(ctx, proj, poli.puntos, poli.color);
                 });
             }
 
             // 3. Dibujar curvas
             if (typeof conexiones_curvas !== 'undefined') {
                 conexiones_curvas.forEach(par => {
-                    dibujarCurvaAutomatica(ctx, proj, par[0], par[1], "#ff006e", 50, 180, false, puntosAnimados);
+                    dibujarCurvaAutomatica(ctx, proj, par[0], par[1], "#ff006e", 50, 180, false);
                 });
             }
             // 3.5 Dibujar y Pintar Pétalos (Curvas con relleno)
@@ -92,7 +91,6 @@
                         petalo.puntos,
                         petalo.color,
                         petalo.altura,
-                        puntosAnimados
                     );
                 });
             }
