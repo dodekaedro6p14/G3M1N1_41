@@ -26,7 +26,11 @@
     <canvas id="canvas"></canvas>
 
     <script src="datos_aracnida.js"></script>
+<<<<<<< HEAD
     <script src="m_grafico_v2.js"></script>
+=======
+    <script src="m_grafico_v1.js"></script>
+>>>>>>> refs/remotes/origin/master
     <script src="controles_v1.js"></script>
 
     <script>
@@ -71,14 +75,22 @@
             // 2. Dibujar polígonos
             if (typeof misPoligonos !== 'undefined') {
                 misPoligonos.forEach(poli => {
+<<<<<<< HEAD
                     dibujarPoligono(ctx, proj, poli.vertices, poli.color);
+=======
+                    dibujarPoligono(ctx, proj, poli.vertices, poli.color, puntosAnimados);
+>>>>>>> refs/remotes/origin/master
                 });
             }
 
             // 3. Dibujar curvas
             if (typeof conexiones_curvas !== 'undefined') {
                 conexiones_curvas.forEach(par => {
+<<<<<<< HEAD
                     dibujarCurvaAutomatica(ctx, proj, par[0], par[1], "#ff006e", 50, 180, false);
+=======
+                    dibujarCurvaAutomatica(ctx, proj, par[0], par[1], "#ff006e", 50, 180, false, puntosAnimados);
+>>>>>>> refs/remotes/origin/master
                 });
             }
             // 3.5 Dibujar y Pintar Pétalos (Curvas con relleno)
@@ -91,6 +103,10 @@
                         petalo.puntos,
                         petalo.color,
                         petalo.altura,
+<<<<<<< HEAD
+=======
+                        puntosAnimados
+>>>>>>> refs/remotes/origin/master
                     );
                 });
             }
@@ -126,7 +142,11 @@
             if (typeof puntos_con_esfera !== 'undefined') {
                 puntos_con_esfera.forEach(idx => {
                     const p = proj(puntos[idx]);
+<<<<<<< HEAD
                     dibujarEsferaSencilla(ctx, p, 15 * estado.zoom, "#b0c4de");
+=======
+                    dibujarEsferaSencilla(ctx, p, 15 * estado.zoom, "#b0c4de", puntosAnimados);
+>>>>>>> refs/remotes/origin/master
                 });
             }
 
