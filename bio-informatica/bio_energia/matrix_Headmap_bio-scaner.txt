@@ -1,6 +1,0 @@
-Importancia Biotecnológica de este Visualizador:
-Interpretación del Brillo Verde: En la matriz de calor, las celdas con brillo verde neón representan el camino de puntuación acumulativa máxima. En la práctica, esto indica que la secuencia de tu hongo y la modificación que propones tienen una afinidad termodinámica óptima. Aquí es donde debes dirigir tus complejos RNP (Ribonucleoproteínas) de CRISPR para asegurar que el ADN se integre correctamente.
-
-Interpretación del Brillo Rojo: Las zonas rojas en el escáner detectan "desiertos de homología". Si intentas una edición genética en un sector rodeado de rojo, el hongo activará sus mecanismos de reparación de errores (como NHEJ en lugar de HDR), lo que suele derivar en fallos genéticos, inactivación de genes vitales o incluso la muerte celular.
-
-Uso para Diagnóstico de Enfermedades: Si alineas una secuencia de un hongo sano contra una muestra enferma, los sectores rojos te mostrarán exactamente dónde ha ocurrido la mutación o la inserción viral que está causando la patología           
